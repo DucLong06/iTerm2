@@ -77,3 +77,6 @@ brew install tmux
 ```
 ## 10. Other setup in theme
 [FULL `~/.zshrc`](./.zshrc)
+
+## 11. Install for vscode
+[Link download font: MesloLGS NF](https://github.com/romkatv/powerlevel10k/issues/671#issuecomment-621031981)
