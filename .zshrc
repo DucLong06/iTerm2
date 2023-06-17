@@ -225,7 +225,7 @@ zsh_wifi_signal(){
         local airport=$(echo $output | grep 'AirPort' | awk -F': ' '{print $2}')
 
         if [ "$airport" = "Off" ]; then
-                local color="249"
+                local color=%F{red}
                 echo -n "%{$color%}Wifi Off"
         else
                 local speed=$(echo $output | grep 'lastTxRate' | awk -F': ' '{print $2}')
@@ -237,6 +237,43 @@ zsh_wifi_signal(){
                 echo -n "$speed Mb/s %{$color%}\uf1eb " 
         fi
 }
+
+# LAN
+POWERLEVEL9K_CUSTOM_LAN_SIGNAL="zsh_lan_signal"
+POWERLEVEL9K_CUSTOM_LAN_SIGNAL_BACKGROUND="black"
+POWERLEVEL9K_CUSTOM_LAN_SIGNAL_FOREGROUND="249"
+
+zsh_lan_signal() {
+    local wifi_output=$(/System/Library/PrivateFrameworks/Apple80211.framework/Versions/A/Resources/airport -I)
+    local airport=$(echo $wifi_output | grep 'AirPort' | awk -F': ' '{print $2}')
+
+    if [ "$airport" = "Off" ]; then
+        # Wi-Fi tắt
+        local lan_interface="en8"
+        local lan_output=$(ifconfig "$lan_interface" 2>/dev/null | grep 'media: ' | awk -F': ' '{print $2}')
+        
+        if [ -n "$lan_output" ]; then
+            local lan_speed=$(echo "$lan_output" | awk -F'baseT' '{print $1}' | sed 's/[^0-9]*//g')
+            local lan_color="%F{green}"
+            [[ $lan_speed -gt 100 ]] && lan_color='%F{yellow}'
+            [[ $lan_speed -lt 50 ]] && lan_color='%F{red}'
+
+            echo -n "$lan_speed Mb/s %{$lan_color%}\uf1eb "
+        else
+            local no_internet_color="%F{red}"
+            echo -n "%{$no_internet_color%}No internet"
+        fi
+    else
+        # Wi-Fi bật
+        local speed=$(echo $wifi_output | grep 'lastTxRate' | awk -F': ' '{print $2}')
+        local wifi_color="%F{green}"
+        [[ $speed -gt 100 ]] && wifi_color='%F{yellow}'
+        [[ $speed -lt 50 ]] && wifi_color='%F{red}'
+
+        echo -n "$speed Mb/s %{$wifi_color%}\uf1eb "
+    fi
+}
+
 
 # os logo
 POWERLEVEL9K_CUSTOM_OS="zsh_os"
@@ -287,10 +324,10 @@ zsh_npm(){
 
 
 # left right prompt
-# POWERLEVEL9K_LEFT_PROMPT_ELEMENTS=( 'custom_os' 'custom_python' 'dir' 'vcs'  )
-# POWERLEVEL9K_RIGHT_PROMPT_ELEMENTS=('status' 'virtualenv' 'custom_npm' 'custom_python' 'node_version' 'custom_cra' 'custom_wifi_signal' 'battery' 'time')
-POWERLEVEL9K_LEFT_PROMPT_ELEMENTS=(  'custom_os' 'custom_python' 'dir' 'vcs' )
-POWERLEVEL9K_RIGHT_PROMPT_ELEMENTS=( 'virtualenv' )
+ POWERLEVEL9K_LEFT_PROMPT_ELEMENTS=( 'custom_os' 'dir' 'vcs'  )
+ POWERLEVEL9K_RIGHT_PROMPT_ELEMENTS=('status' 'virtualenv' 'custom_npm' 'custom_python' 'node_version' 'custom_cra' 'custom_lan_signal' 'battery' 'time')
+# POWERLEVEL9K_LEFT_PROMPT_ELEMENTS=(  'custom_os' 'custom_python' 'dir' 'vcs' )
+# POWERLEVEL9K_RIGHT_PROMPT_ELEMENTS=( 'virtualenv' )
 
 
 # Load Nerd Fonts with Powerlevel9k theme for Zsh
@@ -319,3 +356,13 @@ title_text LongHoangDuc
 code () { VSCODE_CWD="$PWD" open -n -b "com.microsoft.VSCode" --args $* ;}
 () POWERLEVEL9K_MODE='nerdfont-complete'
 () () POWERLEVEL9K_MODE='nerdfont-complete'
+
+# The next line updates PATH for the Google Cloud SDK.
+if [ -f '/Users/longhoangduc/Downloads/google-cloud-sdk/path.zsh.inc' ]; then . '/Users/longhoangduc/Downloads/google-cloud-sdk/path.zsh.inc'; fi
+
+# The next line enables shell command completion for gcloud.
+if [ -f '/Users/longhoangduc/Downloads/google-cloud-sdk/completion.zsh.inc' ]; then . '/Users/longhoangduc/Downloads/google-cloud-sdk/completion.zsh.inc'; fi
+___MY_VMOPTIONS_SHELL_FILE="${HOME}/.jetbrains.vmoptions.sh"; if [ -f "${___MY_VMOPTIONS_SHELL_FILE}" ]; then . "${___MY_VMOPTIONS_SHELL_FILE}"; fi
+
+test -e "${HOME}/.iterm2_shell_integration.zsh" && source "${HOME}/.iterm2_shell_integration.zsh"
+
