@@ -73,7 +73,7 @@ ZSH_THEME="powerlevel9k/powerlevel9k"
 # Add wisely, as too many plugins slow down shell startup.
 plugins=(
 	virtualenv
-	zsh-autosuggestions
+#	zsh-autosuggestions
 )
 
 source $ZSH/oh-my-zsh.sh
