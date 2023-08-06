@@ -34,6 +34,7 @@ Edit in `~/.zshrc`
 ZSH_THEME="powerlevel9k/powerlevel9k"
 ```
 ## 6. Add autosuggestions
+### Option 1: Using autosuggestions
 ```bash
 git clone https://github.com/zsh-users/zsh-autosuggestions $ZSH_CUSTOM/plugins/zsh-autosuggestions
 ```
@@ -43,6 +44,15 @@ plugins=(
     …
     zsh-autosuggestions
 )
+```
+
+### Option 2: Using fig
+```bash
+Link git: https://github.com/withfig/autocomplete
+```
+Install using `brew`
+```bash
+brew install fig
 ```
 ## 7. Highlight syntax
 ```bash
