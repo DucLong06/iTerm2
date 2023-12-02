@@ -80,7 +80,7 @@
     "python.analysis.indexing": false,
     "python.analysis.inlayHints.functionReturnTypes": true,
     "python.analysis.typeCheckingMode": "off",
-    "python.formatting.blackPath": "autupep8",
+    "python.formatting.blackPath": "autopep8",
     "python.formatting.provider": "none",
     "security.workspace.trust.untrustedFiles": "newWindow",
     "sync.gist": "1c3a10ea30f7642f36a7e9a1c22905a6",
