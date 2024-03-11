@@ -22,7 +22,7 @@
     },
     "[python]": {
         "editor.defaultFormatter": "ms-python.autopep8",
-        "editor.formatOnType": true
+        "editor.formatOnType": true,
     },
     "[scss]": {
         "editor.defaultFormatter": "vscode.css-language-features"
@@ -54,7 +54,6 @@
     "editor.unicodeHighlight.nonBasicASCII": false,
     "explorer.confirmDelete": false,
     "explorer.confirmDragAndDrop": false,
-    "files.autoSave": "afterDelay",
     "files.watcherExclude": {
         "/.ammonite": true,
         "/.bloop": true,
@@ -67,18 +66,14 @@
     "go.toolsManagement.autoUpdate": true,
     "javascript.updateImportsOnFileMove.enabled": "always",
     "json.schemas": [],
-    "kite.showWelcomeNotificationOnStartup": false,
-    "liveServer.settings.donotShowInfoMsg": true,
     "prettier.tabWidth": 4,
     "prettier.useTabs": true,
     "pylance.insidersChannel": "daily",
     "python.languageServer": "Pylance",
     "python.autoComplete.addBrackets": true,
-    "python.analysis.autoSearchPaths": false,
     "python.analysis.diagnosticMode": "workspace",
     "python.analysis.fixAll": [],
     "python.analysis.indexing": false,
-    "python.analysis.inlayHints.functionReturnTypes": true,
     "python.analysis.typeCheckingMode": "off",
     "python.formatting.blackPath": "autopep8",
     "python.formatting.provider": "none",
@@ -87,8 +82,8 @@
     "tabnine.experimentalAutoImports": true,
     "terminal.integrated.enableMultiLinePasteWarning": false,
     "terminal.integrated.fontFamily": "MesloLGS NF",
-    "terminal.integrated.fontSize": 13,
     "terminal.integrated.inheritEnv": false,
+    "terminal.integrated.shell.windows": "C:\\WINDOWS\\System32\\cmd.exe",
     "typescript.updateImportsOnFileMove.enabled": "always",
     "workbench.editor.splitInGroupLayout": "vertical",
     "workbench.editorAssociations": {
@@ -98,7 +93,6 @@
     "terminal.integrated.env.osx": {
         "FIG_NEW_SESSION": "1"
     },
-    "window.commandCenter": false,
     "redhat.telemetry.enabled": true,
     "[xml]": {
         "editor.defaultFormatter": "redhat.vscode-xml"
@@ -108,15 +102,51 @@
         "*.py": "python"
     },
     "python.analysis.completeFunctionParens": true,
-    "vim.useSystemClipboard": true,
-    "vim.sk.quickOpen.detail": true,
+    "python.analysis.inlayHints.callArgumentNames": "partial",
+    "python.analysis.inlayHints.functionReturnTypes": true,
+    "python.analysis.inlayHints.pytestParameters": true,
+    "diffEditor.hideUnchangedRegions.enabled": true,
     "workbench.colorTheme": "Cobalt2",
-    "[vue]": {
-        "editor.defaultFormatter": "Vue.volar"
-    },
+    // This is all that matters
     "editor.fontFamily": "JetBrains Mono",
     "editor.letterSpacing": 0.5,
+    "http.proxy": "http://proxy.fpt.vn:80",
+    "http.proxyStrictSSL": false,
+    // Vim setting
+    "[vue]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "vim.useSystemClipboard": true,
+    "vim.normalModeKeyBindings": [
+        {
+            "before": [
+                "<tab>"
+            ],
+            "commands": [
+                "workbench.action.nextEditor"
+            ]
+        },
+        {
+            "before": [
+                "<S-tab>"
+            ],
+            "commands": [
+                "workbench.action.previousEditor"
+            ]
+        },
+    ],
     "vim.normalModeKeyBindingsNonRecursive": [
+        {
+            "before": [
+                "J"
+            ],
+            "after": [
+                "5",
+                "j",
+                "z",
+                "z"
+            ]
+        },
         {
             "before": [
                 "j"
@@ -139,29 +169,13 @@
         },
         {
             "before": [
-                "j",
-                "k"
-            ],
-            "after": [
-                "<ESC>"
-            ]
-        },
-        {
-            "before": [
-                "J"
-            ],
-            "after": [
-                "5",
-                "j",
-            ]
-        },
-        {
-            "before": [
                 "K"
             ],
             "after": [
                 "5",
-                "k"
+                "k",
+                "z",
+                "z"
             ]
         },
         {
@@ -245,6 +259,79 @@
                 "revealInExplorer"
             ]
         },
+        {
+            "before": [
+                "<leader>",
+                "h"
+            ],
+            "after": [
+                "_"
+            ]
+        },
+        {
+            "before": [
+                "<leader>",
+                "l"
+            ],
+            "after": [
+                "$"
+            ]
+        },
+        {
+            "before": [
+                "<leader>",
+                "o",
+                "o"
+            ],
+            "commands": [
+                "workbench.action.showEditorsInActiveGroup"
+            ]
+        },
+    ],
+    "vim.visualModeKeyBindings": [
+        {
+            "before": [
+                ">"
+            ],
+            "after": [
+                ">",
+                "g",
+                "v"
+            ]
+        },
+        {
+            "before": [
+                "<"
+            ],
+            "after": [
+                "<",
+                "g",
+                "v"
+            ]
+        },
+    ],
+    "vim.insertModeKeyBindings": [
+        {
+            "before": [
+                "j",
+                "k"
+            ],
+            "after": [
+                "<Esc>"
+            ]
+        },
     ],
     "vim.leader": "<Space>",
+    "window.commandCenter": false,
+    "cloudcode.duetAI.project": "gothic-concept-408103",
+    "files.autoSave": "afterDelay",
+    "remote.autoForwardPortsSource": "hybrid",
+    "vsicons.dontShowNewVersionMessage": true,
+    "[dockercompose]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "autopep8.args": [
+        "--max-line-length=120"
+    ],
+    "terminal.integrated.copyOnSelection": true,
 }
