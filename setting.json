@@ -319,12 +319,17 @@
             "after": [
                 "<Esc>"
             ]
-        },
+        }
     ],
+    "vim.handleKeys": {
+        "<C-a>": false,
+        "<C-f>": false,
+        "<C-z>": false,
+    },
     "vim.leader": "<Space>",
     "window.commandCenter": false,
     "cloudcode.duetAI.project": "gothic-concept-408103",
-    "files.autoSave": "afterDelay",
+    "files.autoSave": "onFocusChange",
     "remote.autoForwardPortsSource": "hybrid",
     "vsicons.dontShowNewVersionMessage": true,
     "[dockercompose]": {
@@ -334,4 +339,7 @@
         "--max-line-length=120"
     ],
     "terminal.integrated.copyOnSelection": true,
+    "[django-html]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
 }
