@@ -68,7 +68,6 @@
     "json.schemas": [],
     "prettier.tabWidth": 4,
     "prettier.useTabs": true,
-    "pylance.insidersChannel": "daily",
     "python.languageServer": "Pylance",
     "python.autoComplete.addBrackets": true,
     "python.analysis.diagnosticMode": "workspace",
@@ -99,7 +98,10 @@
     },
     "python.diagnostics.sourceMapsEnabled": true,
     "files.associations": {
-        "*.py": "python"
+        "*.py": "python",
+        "*.tsx": "typescriptreact",
+        "*.js": "javascript",
+        "*.ts": "typescript",
     },
     "python.analysis.completeFunctionParens": true,
     "python.analysis.inlayHints.callArgumentNames": "partial",
@@ -110,8 +112,6 @@
     // This is all that matters
     "editor.fontFamily": "JetBrains Mono",
     "editor.letterSpacing": 0.5,
-    "http.proxy": "http://proxy.fpt.vn:80",
-    "http.proxyStrictSSL": false,
     // Vim setting
     "[vue]": {
         "editor.defaultFormatter": "esbenp.prettier-vscode"
@@ -324,12 +324,25 @@
     "vim.handleKeys": {
         "<C-a>": false,
         "<C-f>": false,
+        // VS Code new marker @ next occurence
+        "<C-d>": false,
+        // Copy
+        "<C-c>": false,
+        // Cut
+        "<C-x>": false,
+        // Paste
+        "<C-v>": false,
         "<C-z>": false,
+        "<C-y>": false
     },
     "vim.leader": "<Space>",
+    "vim.easymotion": true,
+    "vim.incsearch": true,
+    "vim.useCtrlKeys": true,
+    "vim.hlsearch": true,
+    "vim.sneak": true,
     "window.commandCenter": false,
-    "cloudcode.duetAI.project": "gothic-concept-408103",
-    "files.autoSave": "onFocusChange",
+    "files.autoSave": "afterDelay",
     "remote.autoForwardPortsSource": "hybrid",
     "vsicons.dontShowNewVersionMessage": true,
     "[dockercompose]": {
@@ -342,4 +355,22 @@
     "[django-html]": {
         "editor.defaultFormatter": "esbenp.prettier-vscode"
     },
+    "gitlens.launchpad.indicator.enabled": false,
+    "github.copilot.enable": {
+        "*": true,
+        "plaintext": false,
+        "markdown": false,
+        "scminput": false,
+        "python": true
+    },
+    "editor.unicodeHighlight.invisibleCharacters": false,
+    "vs-kubernetes": {
+        "vs-kubernetes.minikube-show-information-expiration": "2024-09-20T03:23:58.322Z",
+        "vscode-kubernetes.helm-path-linux": "/home/longhd/.local/state/vs-kubernetes/tools/helm/linux-amd64/helm",
+        "vscode-kubernetes.kubectl-path-linux": "/home/longhd/.local/state/vs-kubernetes/tools/kubectl/kubectl",
+        "vscode-kubernetes.minikube-path-linux": "/home/longhd/.local/state/vs-kubernetes/tools/minikube/linux-amd64/minikube"
+    },
+    "makefile.configureOnOpen": true,
+    "debug.onTaskErrors": "abort",
+    "explorer.confirmPasteNative": false,
 }
