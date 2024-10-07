@@ -1,11 +1,11 @@
 [
     {
         "key": "f1",
-        "command": "-workbench.action.showCommands"
+        "command": "workbench.action.quickOpen"
     },
     {
         "key": "f1",
-        "command": "workbench.action.quickOpen"
+        "command": "-workbench.action.showcommands"
     },
     {
         "key": "alt+k",
@@ -17,4 +17,106 @@
         "command": "editor.action.moveLinesDownAction",
         "when": "editorTextFocus && !editorReadonly"
     },
+    // Move to the previous/next editor.
+    {
+        "key": "cmd+k",
+        "command": "workbench.action.nextEditor"
+    },
+    {
+        "key": "cmd+j",
+        "command": "workbench.action.previousEditor"
+    },
+    // Traverse VSCode IntelliSense suggestions with vim keybindings. 
+    {
+        "key": "cmd+j",
+        "command": "selectNextSuggestion",
+        "when": "suggestWidgetMultipleSuggestions && suggestWidgetVisible && textInputFocus"
+    },
+    {
+        "key": "cmd+k",
+        "command": "selectPrevSuggestion",
+        "when": "suggestWidgetMultipleSuggestions && suggestWidgetVisible && textInputFocus"
+    },
+    // Ensure that tab button works in vim.
+    {
+        "key": "tab",
+        "command": "tab",
+        "when": "editorTextFocus && !editorTabMovesFocus"
+    },
+    {
+        "key": "shift+tab",
+        "command": "outdent",
+        "when": "editorTextFocus && !editorTabMovesFocus"
+    },
+    // Traverse VSCode quick open options with vim keybindings.
+    {
+        "key": "cmd+j",
+        "command": "workbench.action.quickOpenSelectNext",
+        "when": "inQuickOpen"
+    },
+    {
+        "key": "cmd+k",
+        "command": "workbench.action.quickOpenSelectPrevious",
+        "when": "inQuickOpen"
+    },
+    // VSCode terminal commands.
+    {
+        "key": "cmd+n",
+        "command": "workbench.action.terminal.newInActiveWorkspace"
+    },
+    {
+        "key": "cmd+enter",
+        "command": "workbench.action.terminal.toggleTerminal"
+    },
+    {
+        "key": "cmd+ctrl+enter",
+        "command": "workbench.action.toggleMaximizedPanel"
+    },
+    {
+        "key": "cmd+d",
+        "command": "workbench.action.terminal.split",
+        "when": "terminalFocus && terminalProcessSupported"
+    },
+    {
+        "key": "cmd+\\",
+        "command": "-workbench.action.terminal.split",
+        "when": "terminalFocus && terminalProcessSupported"
+    },
+    {
+        "key": "cmd+k",
+        "command": "workbench.action.terminal.focusNextPane",
+        "when": "terminalFocus && terminalProcessSupported"
+    },
+    {
+        "key": "alt+cmd+down",
+        "command": "-workbench.action.terminal.focusNextPane",
+        "when": "terminalFocus && terminalProcessSupported"
+    },
+    {
+        "key": "cmd+j",
+        "command": "workbench.action.terminal.focusPreviousPane",
+        "when": "terminalFocus && terminalProcessSupported"
+    },
+    {
+        "key": "alt+cmd+up",
+        "command": "-workbench.action.terminal.focusPreviousPane",
+        "when": "terminalFocus && terminalProcessSupported"
+    },
+    {
+        "key": "cmd+w",
+        "command": "workbench.action.terminal.kill",
+        "when": "terminalFocus"
+    },
+    // TODO: Traverse search results with vim
+    // {
+    //   "key": "cmd+j",
+    //   "command": "search.action.focusNextSearchResult",
+    //   "when": "hasSearchResult && workbench.view.search.visible"
+    // },
+    // TODO: Select file from explorer.
+    // {
+    //   "key": "cmd+enter",
+    //   "command": "filesExplorer.openFilePreserveFocus",
+    //   "when": "explorerViewletVisible && filesExplorerFocus && !explorerResourceIsFolder && !inputFocus"
+    // },
 ]
