@@ -117,24 +117,6 @@
         "editor.defaultFormatter": "esbenp.prettier-vscode"
     },
     "vim.useSystemClipboard": true,
-    "vim.normalModeKeyBindings": [
-        {
-            "before": [
-                "<tab>"
-            ],
-            "commands": [
-                "workbench.action.nextEditor"
-            ]
-        },
-        {
-            "before": [
-                "<S-tab>"
-            ],
-            "commands": [
-                "workbench.action.previousEditor"
-            ]
-        },
-    ],
     "vim.normalModeKeyBindingsNonRecursive": [
         {
             "before": [
@@ -339,8 +321,11 @@
     "vim.easymotion": true,
     "vim.incsearch": true,
     "vim.useCtrlKeys": true,
-    "vim.hlsearch": true,
     "vim.sneak": true,
+    "vim.hlsearch": true,
+    "vim.timeout": 200,
+    "editor.lineNumbers": "relative",
+    //vscode
     "window.commandCenter": false,
     "files.autoSave": "afterDelay",
     "remote.autoForwardPortsSource": "hybrid",
@@ -356,20 +341,7 @@
         "editor.defaultFormatter": "esbenp.prettier-vscode"
     },
     "gitlens.launchpad.indicator.enabled": false,
-    "github.copilot.enable": {
-        "*": true,
-        "plaintext": false,
-        "markdown": false,
-        "scminput": false,
-        "python": true
-    },
     "editor.unicodeHighlight.invisibleCharacters": false,
-    "vs-kubernetes": {
-        "vs-kubernetes.minikube-show-information-expiration": "2024-09-20T03:23:58.322Z",
-        "vscode-kubernetes.helm-path-linux": "/home/longhd/.local/state/vs-kubernetes/tools/helm/linux-amd64/helm",
-        "vscode-kubernetes.kubectl-path-linux": "/home/longhd/.local/state/vs-kubernetes/tools/kubectl/kubectl",
-        "vscode-kubernetes.minikube-path-linux": "/home/longhd/.local/state/vs-kubernetes/tools/minikube/linux-amd64/minikube"
-    },
     "makefile.configureOnOpen": true,
     "debug.onTaskErrors": "abort",
     "explorer.confirmPasteNative": false,
