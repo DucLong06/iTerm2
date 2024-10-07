@@ -323,7 +323,6 @@
     "vim.useCtrlKeys": true,
     "vim.sneak": true,
     "vim.hlsearch": true,
-    "vim.timeout": 200,
     "editor.lineNumbers": "relative",
     //vscode
     "window.commandCenter": false,
