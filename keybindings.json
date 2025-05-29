@@ -38,16 +38,16 @@
         "when": "suggestWidgetMultipleSuggestions && suggestWidgetVisible && textInputFocus"
     },
     // Ensure that tab button works in vim.
-    {
-        "key": "tab",
-        "command": "tab",
-        "when": "editorTextFocus && !editorTabMovesFocus"
-    },
-    {
-        "key": "shift+tab",
-        "command": "outdent",
-        "when": "editorTextFocus && !editorTabMovesFocus"
-    },
+    // {
+    //     "key": "tab",
+    //     "command": "tab",
+    //     "when": "editorTextFocus && !editorTabMovesFocus"
+    // },
+    // {
+    //     "key": "shift+tab",
+    //     "command": "outdent",
+    //     "when": "editorTextFocus && !editorTabMovesFocus"
+    // },
     // Traverse VSCode quick open options with vim keybindings.
     {
         "key": "cmd+j",
@@ -61,19 +61,19 @@
     },
     // VSCode terminal commands.
     {
-        "key": "cmd+n",
+        "key": "alt+n",
         "command": "workbench.action.terminal.newInActiveWorkspace"
     },
     {
-        "key": "cmd+enter",
+        "key": "shift+enter",
         "command": "workbench.action.terminal.toggleTerminal"
     },
     {
-        "key": "cmd+ctrl+enter",
+        "key": "shift+ctrl+enter",
         "command": "workbench.action.toggleMaximizedPanel"
     },
     {
-        "key": "cmd+d",
+        "key": "alt+d",
         "command": "workbench.action.terminal.split",
         "when": "terminalFocus && terminalProcessSupported"
     },
@@ -83,7 +83,7 @@
         "when": "terminalFocus && terminalProcessSupported"
     },
     {
-        "key": "cmd+k",
+        "key": "alt+k",
         "command": "workbench.action.terminal.focusNextPane",
         "when": "terminalFocus && terminalProcessSupported"
     },
@@ -93,7 +93,7 @@
         "when": "terminalFocus && terminalProcessSupported"
     },
     {
-        "key": "cmd+j",
+        "key": "alt+j",
         "command": "workbench.action.terminal.focusPreviousPane",
         "when": "terminalFocus && terminalProcessSupported"
     },
@@ -103,7 +103,7 @@
         "when": "terminalFocus && terminalProcessSupported"
     },
     {
-        "key": "cmd+w",
+        "key": "alt+w",
         "command": "workbench.action.terminal.kill",
         "when": "terminalFocus"
     },

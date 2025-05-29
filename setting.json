@@ -2,8 +2,9 @@
     "[dockerfile]": {
         "editor.defaultFormatter": "ms-azuretools.vscode-docker"
     },
-    "[go]": {
-        "editor.defaultFormatter": "golang.go"
+    "[yaml]": {
+        "editor.defaultFormatter": "redhat.vscode-yaml",
+        "editor.tabSize": 2
     },
     "[html]": {
         "editor.defaultFormatter": "vscode.html-language-features"
@@ -23,12 +24,10 @@
     "[python]": {
         "editor.defaultFormatter": "ms-python.autopep8",
         "editor.formatOnType": true,
+        "diffEditor.ignoreTrimWhitespace": true,
     },
     "[scss]": {
         "editor.defaultFormatter": "vscode.css-language-features"
-    },
-    "[sql]": {
-        "editor.defaultFormatter": "mtxr.sqltools"
     },
     "[typescript]": {
         "editor.defaultFormatter": "vscode.typescript-language-features"
@@ -36,13 +35,11 @@
     "[typescriptreact]": {
         "editor.defaultFormatter": "esbenp.prettier-vscode"
     },
-    "aws.profile": "profile:default",
-    "bracketPairColorizer.depreciation-notice": false,
-    "debug.inlineValues": true,
+    "http.proxy": "http://proxy.fpt.vn:80",
+    "http.proxyStrictSSL": false,
     "editor.accessibilitySupport": "off",
     "editor.bracketPairColorization.enabled": true,
-    "editor.defaultColorDecorators": true,
-    "editor.defaultFormatter": "Shan.code-settings-sync",
+    "editor.defaultColorDecorators": "auto",
     "editor.detectIndentation": false,
     "editor.formatOnPaste": true,
     "editor.formatOnSave": true,
@@ -60,29 +57,22 @@
         "**/.metals": true
     },
     "git.autofetch": true,
-    "git.confirmSync": false,
+    "git.confirmSync": true,
     "git.enableSmartCommit": true,
     "git.openRepositoryInParentFolders": "always",
-    "go.toolsManagement.autoUpdate": true,
     "javascript.updateImportsOnFileMove.enabled": "always",
     "json.schemas": [],
     "prettier.tabWidth": 4,
     "prettier.useTabs": true,
     "python.languageServer": "Pylance",
-    "python.autoComplete.addBrackets": true,
     "python.analysis.diagnosticMode": "workspace",
-    "python.analysis.fixAll": [],
     "python.analysis.indexing": false,
     "python.analysis.typeCheckingMode": "off",
     "python.formatting.blackPath": "autopep8",
     "python.formatting.provider": "none",
     "security.workspace.trust.untrustedFiles": "newWindow",
-    "sync.gist": "1c3a10ea30f7642f36a7e9a1c22905a6",
-    "tabnine.experimentalAutoImports": true,
-    "terminal.integrated.enableMultiLinePasteWarning": false,
     "terminal.integrated.fontFamily": "MesloLGS NF",
     "terminal.integrated.inheritEnv": false,
-    "terminal.integrated.shell.windows": "C:\\WINDOWS\\System32\\cmd.exe",
     "typescript.updateImportsOnFileMove.enabled": "always",
     "workbench.editor.splitInGroupLayout": "vertical",
     "workbench.editorAssociations": {
@@ -104,10 +94,7 @@
         "*.ts": "typescript",
     },
     "python.analysis.completeFunctionParens": true,
-    "python.analysis.inlayHints.callArgumentNames": "partial",
     "python.analysis.inlayHints.functionReturnTypes": true,
-    "python.analysis.inlayHints.pytestParameters": true,
-    "diffEditor.hideUnchangedRegions.enabled": true,
     "workbench.colorTheme": "Cobalt2",
     // This is all that matters
     "editor.fontFamily": "JetBrains Mono",
@@ -118,6 +105,22 @@
     },
     "vim.useSystemClipboard": true,
     "vim.normalModeKeyBindingsNonRecursive": [
+        {
+            "before": [
+                "<C-o>"
+            ],
+            "commands": [
+                "workbench.action.navigateBack"
+            ]
+        },
+        {
+            "before": [
+                "<C-p>"
+            ],
+            "commands": [
+                "workbench.action.navigateForward"
+            ]
+        },
         {
             "before": [
                 "J"
@@ -306,13 +309,10 @@
     "vim.handleKeys": {
         "<C-a>": false,
         "<C-f>": false,
-        // VS Code new marker @ next occurence
+        "<C-i>": false,
         "<C-d>": false,
-        // Copy
         "<C-c>": false,
-        // Cut
         "<C-x>": false,
-        // Paste
         "<C-v>": false,
         "<C-z>": false,
         "<C-y>": false
@@ -321,10 +321,8 @@
     "vim.easymotion": true,
     "vim.incsearch": true,
     "vim.useCtrlKeys": true,
-    "vim.sneak": true,
     "vim.hlsearch": true,
-    "editor.lineNumbers": "relative",
-    //vscode
+    "vim.sneak": true,
     "window.commandCenter": false,
     "files.autoSave": "afterDelay",
     "remote.autoForwardPortsSource": "hybrid",
@@ -339,9 +337,37 @@
     "[django-html]": {
         "editor.defaultFormatter": "esbenp.prettier-vscode"
     },
-    "gitlens.launchpad.indicator.enabled": false,
+    "gitlens.launchpad.indicator.enabled": true,
+    "github.copilot.enable": {
+        "*": true,
+        "plaintext": false,
+        "markdown": false,
+        "scminput": false,
+        "python": true
+    },
     "editor.unicodeHighlight.invisibleCharacters": false,
+    "vs-kubernetes": {
+        "vscode-kubernetes.helm-path-linux": "/home/longhd/.local/state/vs-kubernetes/tools/helm/linux-amd64/helm",
+        "vscode-kubernetes.kubectl-path-linux": "/home/longhd/.local/state/vs-kubernetes/tools/kubectl/kubectl",
+        "vscode-kubernetes.minikube-path-linux": "/home/longhd/.local/state/vs-kubernetes/tools/minikube/linux-amd64/minikube"
+    },
     "makefile.configureOnOpen": true,
     "debug.onTaskErrors": "abort",
     "explorer.confirmPasteNative": false,
+    "search.showLineNumbers": true,
+    "zenMode.hideLineNumbers": false,
+    "vim.smartRelativeLine": false,
+    "notebook.lineNumbers": "on",
+    "window.customTitleBarVisibility": "auto",
+    "[helm]": {
+        "editor.tabSize": 2,
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "redhat.vscode-yaml",
+    },
+    "database-client.autoSync": true,
+    "terminal.integrated.enableMultiLinePasteWarning": "never",
+    "tabnine.experimentalAutoImports": true,
+    "gitlens.ai.model": "vscode",
+    "gitlens.ai.vscode.model": "copilot:o3-mini",
+    "terminal.integrated.suggest.enabled": true,
 }
