@@ -506,9 +506,100 @@
         },
         {
             "key": "w",
-            "name": "Save file",
-            "type": "command",
-            "command": "workbench.action.files.save"
+            "name": "+Windows",
+            "type": "bindings",
+            "bindings": [
+                {
+                    "key": "v",
+                    "name": "Split right (vertical)",
+                    "type": "command",
+                    "command": "workbench.action.splitEditorRight"
+                },
+                {
+                    "key": "s",
+                    "name": "Split down (horizontal)",
+                    "type": "command",
+                    "command": "workbench.action.splitEditorDown"
+                },
+                {
+                    "key": "w",
+                    "name": "Next window",
+                    "type": "command",
+                    "command": "workbench.action.navigateEditorGroups"
+                },
+                {
+                    "key": "d",
+                    "name": "Close window",
+                    "type": "command",
+                    "command": "workbench.action.closeEditorsAndGroup"
+                },
+                {
+                    "key": "o",
+                    "name": "Close other windows",
+                    "type": "command",
+                    "command": "workbench.action.closeEditorsInOtherGroups"
+                },
+                {
+                    "key": "h",
+                    "name": "Focus left",
+                    "type": "command",
+                    "command": "workbench.action.focusLeftGroup"
+                },
+                {
+                    "key": "j",
+                    "name": "Focus below",
+                    "type": "command",
+                    "command": "workbench.action.focusBelowGroup"
+                },
+                {
+                    "key": "k",
+                    "name": "Focus above",
+                    "type": "command",
+                    "command": "workbench.action.focusAboveGroup"
+                },
+                {
+                    "key": "l",
+                    "name": "Focus right",
+                    "type": "command",
+                    "command": "workbench.action.focusRightGroup"
+                },
+                {
+                    "key": "H",
+                    "name": "Move editor left",
+                    "type": "command",
+                    "command": "workbench.action.moveEditorToLeftGroup"
+                },
+                {
+                    "key": "J",
+                    "name": "Move editor below",
+                    "type": "command",
+                    "command": "workbench.action.moveEditorToBelowGroup"
+                },
+                {
+                    "key": "K",
+                    "name": "Move editor above",
+                    "type": "command",
+                    "command": "workbench.action.moveEditorToAboveGroup"
+                },
+                {
+                    "key": "L",
+                    "name": "Move editor right",
+                    "type": "command",
+                    "command": "workbench.action.moveEditorToRightGroup"
+                },
+                {
+                    "key": "=",
+                    "name": "Equalize widths",
+                    "type": "command",
+                    "command": "workbench.action.evenEditorWidths"
+                },
+                {
+                    "key": "m",
+                    "name": "Maximize toggle",
+                    "type": "command",
+                    "command": "workbench.action.toggleMaximizeEditorGroup"
+                }
+            ]
         },
         {
             "key": "q",
@@ -581,6 +672,18 @@
                     "name": "Reveal in explorer",
                     "type": "command",
                     "command": "revealInExplorer"
+                },
+                {
+                    "key": "w",
+                    "name": "Write / Save file",
+                    "type": "command",
+                    "command": "workbench.action.files.save"
+                },
+                {
+                    "key": "a",
+                    "name": "Write all",
+                    "type": "command",
+                    "command": "workbench.action.files.saveAll"
                 }
             ]
         },
