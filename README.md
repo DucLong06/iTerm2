@@ -17,7 +17,9 @@ What it does, in order: system packages → Ghostty (snap) → VS Code (apt) →
 
 - Idempotent: safe to re-run. Replaced files are backed up as `*.bak-<date>`.
 - After it finishes it prints what needs a **logout/reboot** (default shell, fonts, GNOME autostart). Reboot, then run `./install.sh --skip-apt` once more to verify.
-- Options: `--proxy URL`, `--no-proxy`, `--skip-apt`, `--only configs,vscode-config` (see `--list-steps`).
+- Proxy: answering **y** (or `--proxy URL`) applies the proxy to the shell (`~/.zsh_proxy`), git, npm, pip, docker client **and** daemon, apt, snap, `sudo` (env_keep) and VS Code. `--no-proxy` removes all of it again.
+- Options: `--proxy URL [--no-proxy-list LIST]`, `--no-proxy`, `--skip-apt`, `--only configs,vscode-config` (see `--list-steps`).
+- Tested on a clean Ubuntu 24.04 container behind a corporate proxy: `linux/test/run.sh --proxy http://proxy:port` (Ghostty/snap, docker daemon and the ibus watcher are skipped there with a warning, everything else runs end to end).
 - Machine-specific things stay out of git: `~/.zsh_proxy` (written by the proxy prompt) and `~/.zsh_local` (your own aliases).
 
 Layout of `linux/`:
