@@ -1,0 +1,41 @@
+// Layout mặc định: 1 thanh status zjstatus ở dưới, màu tokyonight, hiện gợi ý phím theo mode
+layout {
+    default_tab_template {
+        children
+        pane size=1 borderless=true {
+            plugin location="file:$HOME/.config/zellij/plugins/zjstatus.wasm" {
+                format_left   "{mode}#[bg=#1a1b26] {tabs}"
+                format_center ""
+                format_right  "#[bg=#1a1b26,fg=#565f89]{session} {datetime}"
+                format_space  "#[bg=#1a1b26]"
+                format_hide_on_overlength "true"
+                format_precedence "lrc"
+                border_enabled  "false"
+                hide_frame_for_single_pane "true"
+
+                mode_normal        "#[bg=#9ece6a,fg=#1a1b26,bold] NORMAL #[bg=#1a1b26,fg=#9ece6a]#[bg=#1a1b26,fg=#565f89] Ctrl+ p:pane t:tab n:resize b:move s:scroll o:session g:lock q:quit  Alt+ n:new f:float ←→:nhảy "
+                mode_locked        "#[bg=#f7768e,fg=#1a1b26,bold] LOCKED #[bg=#1a1b26,fg=#f7768e]#[bg=#1a1b26,fg=#565f89] Ctrl+g: mở khoá "
+                mode_pane          "#[bg=#7aa2f7,fg=#1a1b26,bold] PANE #[bg=#1a1b26,fg=#7aa2f7]#[bg=#1a1b26,fg=#c0caf5] n:mới d:xuống r:phải x:đóng f:fullscreen w:float e:embed c:đổi tên p:chuyển  Esc:thoát "
+                mode_tab           "#[bg=#bb9af7,fg=#1a1b26,bold] TAB #[bg=#1a1b26,fg=#bb9af7]#[bg=#1a1b26,fg=#c0caf5] n:mới x:đóng r:đổi tên ←→:chuyển 1-9:nhảy s:sync-input  Esc:thoát "
+                mode_resize        "#[bg=#e0af68,fg=#1a1b26,bold] RESIZE #[bg=#1a1b26,fg=#e0af68]#[bg=#1a1b26,fg=#c0caf5] hjkl/←↓↑→:co giãn +/-:tăng giảm  Esc:thoát "
+                mode_move          "#[bg=#e0af68,fg=#1a1b26,bold] MOVE #[bg=#1a1b26,fg=#e0af68]#[bg=#1a1b26,fg=#c0caf5] hjkl/←↓↑→:di chuyển pane n/Tab:xoay  Esc:thoát "
+                mode_scroll        "#[bg=#2ac3de,fg=#1a1b26,bold] SCROLL #[bg=#1a1b26,fg=#2ac3de]#[bg=#1a1b26,fg=#c0caf5] j/k:cuộn PgUp/PgDn:trang s:tìm e:mở trong nvim  Esc:thoát "
+                mode_enter_search  "#[bg=#2ac3de,fg=#1a1b26,bold] SEARCH #[bg=#1a1b26,fg=#2ac3de]#[bg=#1a1b26,fg=#c0caf5] gõ từ khoá rồi Enter "
+                mode_search        "#[bg=#2ac3de,fg=#1a1b26,bold] SEARCH #[bg=#1a1b26,fg=#2ac3de]#[bg=#1a1b26,fg=#c0caf5] n:tiếp p:lùi c:phân biệt hoa thường w:cả từ  Esc:thoát "
+                mode_session       "#[bg=#ff9e64,fg=#1a1b26,bold] SESSION #[bg=#1a1b26,fg=#ff9e64]#[bg=#1a1b26,fg=#c0caf5] d:detach w:quản lý session c:config p:plugin  Esc:thoát "
+                mode_rename_tab    "#[bg=#bb9af7,fg=#1a1b26,bold] RENAME TAB #[bg=#1a1b26,fg=#bb9af7]#[bg=#1a1b26,fg=#c0caf5] gõ tên rồi Enter "
+                mode_rename_pane   "#[bg=#7aa2f7,fg=#1a1b26,bold] RENAME PANE #[bg=#1a1b26,fg=#7aa2f7]#[bg=#1a1b26,fg=#c0caf5] gõ tên rồi Enter "
+                mode_prompt        "#[bg=#f7768e,fg=#1a1b26,bold] PROMPT #[bg=#1a1b26,fg=#f7768e]"
+                mode_tmux          "#[bg=#ff9e64,fg=#1a1b26,bold] TMUX #[bg=#1a1b26,fg=#ff9e64]"
+
+                tab_normal   "#[bg=#1a1b26,fg=#565f89] {index}:{name} "
+                tab_active   "#[bg=#1a1b26,fg=#7aa2f7,bold] {index}:{name} "
+                tab_separator ""
+
+                datetime          "#[fg=#565f89,bg=#1a1b26] {format} "
+                datetime_format   "%H:%M"
+                datetime_timezone "Asia/Ho_Chi_Minh"
+            }
+        }
+    }
+}
