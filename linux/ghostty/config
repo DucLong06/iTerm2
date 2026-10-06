@@ -1,0 +1,29 @@
+# === Font ===
+font-family = JetBrainsMono Nerd Font
+font-size = 13
+font-feature = -calt
+
+# === Giao diện ===
+window-padding-x = 15, 5
+window-padding-y = 5, 15
+window-padding-balance = false
+split-divider-color = #202020
+unfocused-split-opacity = 0.7
+unfocused-split-fill = "#333333"
+
+# === Con trỏ ===
+adjust-cursor-thickness = 4
+cursor-opacity = 0.85
+custom-shader = shaders/cursor_warp.glsl
+custom-shader-animation = always
+
+# === Hành vi ===
+scrollback-limit = 30000000
+copy-on-select = clipboard
+shell-integration-features = sudo,ssh-env,ssh-terminfo,title
+
+# === Phím tắt ===
+keybind = shift+enter=text:\x1b\r
+
+# (tuỳ chọn, bỏ # để thử) theme = TokyoNight Night   -> xem danh sách: ghostty +list-themes
+# (tuỳ chọn) custom-shader = shaders-bg/bloom.glsl  -> bộ shader nền trong thư mục shaders-bg

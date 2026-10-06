@@ -1,4 +1,41 @@
-# Setup iTerm for my mac
+# Terminal & editor setup (macOS + Linux)
+
+| Platform | What | Where |
+|---|---|---|
+| Linux (Ubuntu) | Ghostty + zsh/powerlevel10k + Neovim (LazyVim) + VS Code (vscode-neovim) + zellij + CLI tools, **one-click installer** | [`linux/`](linux/) |
+| macOS | iTerm2 + zsh/powerlevel10k + VS Code settings | this README (below), `setting.json`, `keybindings.json`, `.zshrc` |
+
+## Linux one-click setup
+
+```bash
+git clone https://github.com/DucLong06/iTerm2.git ~/dotfiles
+cd ~/dotfiles/linux
+./install.sh            # asks whether to configure an HTTP proxy, then installs everything
+```
+
+What it does, in order: system packages → Ghostty (snap) → VS Code (apt) → Neovim → fonts → oh-my-zsh + powerlevel10k + plugins → nvm/Node, uv, Go → CLI tools into `~/.local/bin` (lazygit, fd, eza, bat, zoxide, fastfetch, delta, yazi, tldr, atuin, zellij, glow, lazydocker) → config files (zsh, Ghostty + cursor/background shaders, LazyVim, zellij + zjstatus, tmux) → VS Code settings/keybindings/extensions → Ghostty IME auto-switch (ibus, X11) → gssh → default shell.
+
+- Idempotent: safe to re-run. Replaced files are backed up as `*.bak-<date>`.
+- After it finishes it prints what needs a **logout/reboot** (default shell, fonts, GNOME autostart). Reboot, then run `./install.sh --skip-apt` once more to verify.
+- Options: `--proxy URL`, `--no-proxy`, `--skip-apt`, `--only configs,vscode-config` (see `--list-steps`).
+- Machine-specific things stay out of git: `~/.zsh_proxy` (written by the proxy prompt) and `~/.zsh_local` (your own aliases).
+
+Layout of `linux/`:
+
+```
+install.sh            the installer
+zsh/.zshrc .p10k.zsh  shell + prompt
+ghostty/config        terminal (shaders are cloned by the installer)
+nvim/                 LazyVim config (lazy-lock.json pinned, Vietnamese spell file)
+vscode/               settings.json, keybindings.json, extensions.txt
+zellij/               config.kdl + layouts (zjstatus bar, nvim<->zellij Ctrl+hjkl)
+tmux/.tmux.conf       tpm + tmux-power
+bin/, autostart/      ghostty-ime-watch (English IME inside Ghostty)
+```
+
+---
+
+# macOS: Setup iTerm2
 
 ## 1. Install iTerm2
 ```bash

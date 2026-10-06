@@ -1,0 +1,26 @@
+#!/bin/bash
+# Tự chuyển bộ gõ theo cửa sổ (X11 + ibus):
+#   focus vào Ghostty  -> English (xkb:us::eng), nhớ lại bộ gõ đang dùng
+#   rời Ghostty        -> trả lại bộ gõ đã nhớ (Unikey)
+ENG="xkb:us::eng"
+LOG="/tmp/ghostty-ime-watch.log"
+log() { printf "%s %s\n" "$(date +%H:%M:%S)" "$*" >> "$LOG"; }
+saved=""; in_ghostty=0; prev_id=""
+is_ghostty() { [[ "$(xprop -id "$1" WM_CLASS 2>/dev/null)" == *'"ghostty"'* ]]; }
+stdbuf -oL xprop -spy -root _NET_ACTIVE_WINDOW 2>/dev/null | while read -r line; do
+  id=${line##* }
+  [[ -z "$id" || "$id" == "$prev_id" || "$id" == "0x0" ]] && continue
+  prev_id=$id
+  if is_ghostty "$id"; then
+    if (( ! in_ghostty )); then
+      cur=$(ibus engine 2>/dev/null)
+      [[ -n "$cur" && "$cur" != "$ENG" ]] && saved="$cur" && ibus engine "$ENG" >/dev/null 2>&1; log "vào Ghostty: $cur -> $ENG"
+      in_ghostty=1
+    fi
+  else
+    if (( in_ghostty )); then
+      [[ -n "$saved" ]] && ibus engine "$saved" >/dev/null 2>&1; log "rời Ghostty: -> ${saved:-giữ nguyên}"
+      in_ghostty=0
+    fi
+  fi
+done

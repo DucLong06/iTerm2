@@ -80,7 +80,7 @@ plugins=(git
         zsh-syntax-highlighting
         you-should-use 
         zsh-bat
-        poetry
+        # poetry
         # pyenv
         nvm
 	    fzf
@@ -124,14 +124,14 @@ source $ZSH/oh-my-zsh.sh
 
 # >>> conda initialize >>>
 # # !! Contents within this block are managed by 'conda init' !!
-# __conda_setup="$('/home/longhd/anaconda3/bin/conda' 'shell.zsh' 'hook' 2> /dev/null)"
+# __conda_setup="$('$HOME/anaconda3/bin/conda' 'shell.zsh' 'hook' 2> /dev/null)"
 # if [ $? -eq 0 ]; then
 #     eval "$__conda_setup"
 # else
-#     if [ -f "/home/longhd/anaconda3/etc/profile.d/conda.sh" ]; then
-#         . "/home/longhd/anaconda3/etc/profile.d/conda.sh"
+#     if [ -f "$HOME/anaconda3/etc/profile.d/conda.sh" ]; then
+#         . "$HOME/anaconda3/etc/profile.d/conda.sh"
 #     else
-#         export PATH="/home/longhd/anaconda3/bin:$PATH"
+#         export PATH="$HOME/anaconda3/bin:$PATH"
 #     fi
 # fi
 # unset __conda_setup
@@ -143,25 +143,9 @@ export PATH="$HOME/.local/bin:$PATH"
 # Alias for python to use python3
 alias python=python3
 #<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-export HTTP_PROXY="http://proxy/"
-export HTTPS_PROXY="http://proxy/"
-export http_proxy="http://proxy/"
-export https_proxy="http://proxy/"
-export no_proxy="localhost,127.0.0.1,::1,192.168.49.0/24,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16,.svc,.cluster.local,jaeger,118.70.7.162"
-######################
-# npm Settings
-######################
-npm config set registry http://registry.npmjs.org/
-npm config set proxy "http://proxy"
-npm config set https-proxy "http://proxy"
-npm config set strict-ssl false
-echo "registry=http://registry.npmjs.org/" > ~/.npmrc
-echo "proxy=http://proxy" >> ~/.npmrc
-echo "strict-ssl=false" >> ~/.npmrc
-echo "http-proxy=http://proxy" >> ~/.npmrc
-echo "http_proxy=http://proxy" >> ~/.npmrc
-echo "https_proxy=http://proxy" >> ~/.npmrc
-# echo "https-proxy=http://proxy" >> ~/.npmrcexport PYENV_ROOT="$HOME/.pyenv"
+# Proxy (optional): created by linux/install.sh when you answer "y" to the proxy question
+[[ -f ~/.zsh_proxy ]] && source ~/.zsh_proxy
+export PYENV_ROOT="$HOME/.pyenv"
 
 
 export NVM_DIR="$HOME/.nvm"
@@ -174,8 +158,8 @@ export NVM_DIR="$HOME/.nvm"
 autoload -U +X bashcompinit && bashcompinit
 complete -o nospace -C /usr/bin/terraform terraform
 alias lzd=lazydocker    
-alias vpnon="sudo nmcli connection up longhd14"
-alias vpnoff="sudo nmcli connection down longhd14"
+# Machine-specific aliases (VPN names, work hosts...) live in ~/.zsh_local (not committed)
+[[ -f ~/.zsh_local ]] && source ~/.zsh_local
 
 function git-sync-branches() {
   local force_delete=false
@@ -195,3 +179,53 @@ function git-sync-branches() {
 
   echo "Sync complete!"
 }
+
+# opencode
+export PATH=$HOME/.opencode/bin:$PATH
+
+# bun completions
+[ -s "$HOME/.bun/_bun" ] && source "$HOME/.bun/_bun"
+
+# bun
+export BUN_INSTALL="$HOME/.bun"
+export PATH="$BUN_INSTALL/bin:$PATH"
+
+
+export PATH="$HOME/.local/bin:$PATH"
+# starship intentionally disabled: the prompt is powerlevel10k
+export PATH="/opt/nvim-linux-x86_64/bin:$PATH"
+alias vi='nvim'
+alias vim='nvim'
+export EDITOR='nvim'
+export VISUAL='nvim'
+
+# Go toolchain (installed to ~/.local/go by linux/install.sh)
+export GOPATH="$HOME/go"
+export PATH="$HOME/.local/go/bin:$GOPATH/bin:$PATH"
+
+# === Modern CLI tools (~/.local/bin) ===
+eval "$(zoxide init zsh)"            # z <name> -> jump to a frequently used dir; zi -> pick with fzf
+alias ls='eza --icons --group-directories-first'
+alias ll='eza -l --icons --git --group-directories-first'
+alias la='eza -la --icons --git --group-directories-first'
+alias lt='eza --tree --level=2 --icons'
+alias cat='bat --paging=never'
+export BAT_THEME="tokyonight_night"
+export MANPAGER="sh -c 'col -bx | bat -l man -p'"
+y() { local tmp; tmp="$(mktemp -t yazi-cwd.XXXXXX)"; yazi "$@" --cwd-file="$tmp"; local d; d="$(cat -- "$tmp")" && [ -n "$d" ] && [ "$d" != "$PWD" ] && builtin cd -- "$d"; rm -f -- "$tmp"; }  # y: open yazi; quitting with q cds into the last directory
+
+# atuin: smarter shell history (Ctrl+R). Up-arrow stays native
+eval "$(atuin init zsh --disable-up-arrow)"
+
+
+# === gssh (from ghostty-superpowers; only the gssh plugin is loaded) ===
+# ssh with autosuggestions + syntax highlighting on the remote, without touching its config.
+export GSP_SSH_EPHEMERAL=1   # remove the bundle from the remote on logout (no residue)
+export GSP_SSH_WRAP=1        # plain `ssh` is wrapped too (scp/rsync/git/non-tty ssh still use the real ssh)
+[[ -f ~/.ghostty-superpowers/plugins/remote-ssh.zsh ]] && source ~/.ghostty-superpowers/plugins/remote-ssh.zsh
+# Ghostty re-wraps `ssh` at the first prompt (after .zshrc) and would shadow gssh; re-source gssh once after that.
+_gsp_rewrap_ssh() {
+  [[ -f ~/.ghostty-superpowers/plugins/remote-ssh.zsh ]] && source ~/.ghostty-superpowers/plugins/remote-ssh.zsh
+  precmd_functions=(${precmd_functions:#_gsp_rewrap_ssh})
+}
+precmd_functions+=(_gsp_rewrap_ssh)
