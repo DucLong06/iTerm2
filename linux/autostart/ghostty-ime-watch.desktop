@@ -2,6 +2,6 @@
 Type=Application
 Name=Ghostty IME watch
 Comment=Tự chuyển ibus sang English khi focus Ghostty
-Exec=$HOME/.local/bin/ghostty-ime-watch
+Exec=/home/USER/.local/bin/ghostty-ime-watch
 OnlyShowIn=GNOME;
 X-GNOME-Autostart-enabled=true

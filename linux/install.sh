@@ -7,7 +7,8 @@
 #  Author : DucLong06 <https://github.com/DucLong06>
 #  Source : https://github.com/DucLong06/iTerm2  (linux/ directory)
 #
-#  Usage  : ./install.sh [--proxy URL | --no-proxy] [--skip-apt] [--only STEP[,STEP]] [--list-steps]
+#  Usage  : ./install.sh [--proxy URL [--no-proxy-list LIST] | --no-proxy] [--skip-apt] [--only STEP[,STEP]] [--list-steps]
+#           --proxy applies the URL to shell, git, npm, pip, docker (client + daemon), apt, snap, sudo env and VS Code.
 #
 #  The script is idempotent: run it again any time (and after the reboot it
 #  asks for). Steps that are already done are skipped or refreshed in place.
@@ -58,16 +59,19 @@ backup() {  # backup <path>: keep a copy before overwriting a user file
   [[ -e "$1" && ! -L "$1" ]] || return 0
   cp -a "$1" "$1.bak-$STAMP"; info "backup: $1.bak-$STAMP"
 }
-install_file() {  # install_file <src> <dst> [mode]: copy with backup, expand $HOME placeholders
+install_file() {  # install_file <src> <dst> [mode]: copy with backup, expand the /home/USER placeholder
   local src="$1" dst="$2" mode="${3:-644}"
   mkdir -p "$(dirname "$dst")"
-  if [[ -f "$dst" ]] && cmp -s <(sed "s|\$HOME|$HOME|g; s|/home/USER|$HOME|g" "$src") "$dst"; then
+  if [[ -f "$dst" ]] && cmp -s <(sed "s|/home/USER|$HOME|g" "$src") "$dst"; then
     info "unchanged: $dst"; return 0
   fi
   backup "$dst"
-  sed "s|\$HOME|$HOME|g; s|/home/USER|$HOME|g" "$src" > "$dst"; chmod "$mode" "$dst"; ok "installed $dst"
+  sed "s|/home/USER|$HOME|g" "$src" > "$dst"; chmod "$mode" "$dst"; ok "installed $dst"
 }
-fetch() { curl -fsSL --retry 3 -o "$2" "$1"; }
+fetch() { curl -fsSL --retry 5 --retry-all-errors --retry-delay 5 -o "$2" "$1"; }   # retry-all-errors: proxies return 502/503 now and then
+retry() {  # retry <n> <cmd...>
+  local n="$1" i; shift; for ((i=1;i<=n;i++)); do "$@" && return 0; warn "attempt $i/$n failed: $*"; sleep 5; done; return 1
+}
 gh_bin() {  # gh_bin <name> <url> <archive-type: tgz|zip|xz|raw> [path-inside-archive]
   local name="$1" url="$2" kind="$3" inner="${4:-$1}" tmp
   if [[ -x "$LOCAL_BIN/$name" ]] && [[ -f "$STATE_DIR/bin-$name" ]] && [[ "$(cat "$STATE_DIR/bin-$name")" == "$url" ]]; then
@@ -85,17 +89,21 @@ gh_bin() {  # gh_bin <name> <url> <archive-type: tgz|zip|xz|raw> [path-inside-ar
   install -m755 "$found" "$LOCAL_BIN/$name"; echo "$url" > "$STATE_DIR/bin-$name"; rm -rf "$tmp"
   ok "$name -> $LOCAL_BIN/$name"
 }
+apt_retry() {  # apt_retry <apt-get args...>: corporate proxies return the odd 502; retry a few times
+  local i; for i in 1 2 3 4; do sudo DEBIAN_FRONTEND=noninteractive apt-get -o Acquire::Retries=3 "$@" && return 0; warn "apt-get $1 failed (attempt $i/4), retrying in 10s"; sleep 10; done; return 1
+}
 git_clone_or_pull() {  # git_clone_or_pull <repo-url> <dir> [--depth1]
-  if [[ -d "$2/.git" ]]; then git -C "$2" pull -q --ff-only || warn "could not update $2"; info "updated $2"
-  else git clone -q --depth 1 "$1" "$2"; ok "cloned $2"; fi
+  if [[ -d "$2/.git" ]]; then git -C "$2" pull -q --ff-only >/dev/null 2>&1 || warn "could not update $2"; info "updated $2"
+  else retry 3 git clone -q --depth 1 "$1" "$2"; ok "cloned $2"; fi
 }
 
 # ----------------------------------------------------------------------------- args
-PROXY_MODE="ask"; PROXY_URL=""; SKIP_APT=0; ONLY=""
+PROXY_MODE="ask"; PROXY_URL=""; NP=""; SKIP_APT=0; ONLY=""
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --proxy)      PROXY_MODE="yes"; PROXY_URL="$2"; shift ;;
     --no-proxy)   PROXY_MODE="no" ;;
+    --no-proxy-list) NP="$2"; shift ;;
     --skip-apt)   SKIP_APT=1 ;;
     --only)       ONLY="$2"; shift ;;
     --list-steps) printf '%s\n' prereqs proxy ghostty vscode neovim fonts zsh node tools configs vscode-config ime gssh shell summary; exit 0 ;;
@@ -108,20 +116,46 @@ want() { [[ -z "$ONLY" ]] || [[ ",$ONLY," == *",$1,"* ]]; }
 [[ "$(uname -s)" == "Linux" ]] || die "This script is for Linux. For macOS use the root of the repo (iTerm2 setup)."
 [[ "$(uname -m)" == "x86_64" ]] || die "Only x86_64 binaries are pinned here. Adjust the *_VER urls for $(uname -m)."
 
+# pip + docker client proxy need python3 (for safe merging); called once python3 is guaranteed (after apt step)
+apply_user_app_proxy() {
+  local url np; url="$(cat "$STATE_DIR/proxy" 2>/dev/null || true)"; np="$(cat "$STATE_DIR/no_proxy" 2>/dev/null || true)"
+  [[ -n "$url" ]] || return 0
+  have python3 || { warn "python3 missing; pip/docker-client proxy will be applied on the next run"; return 0; }
+  mkdir -p "$HOME/.config/pip"; python3 - "$HOME/.config/pip/pip.conf" "$url" <<'EOF'
+import sys,configparser,pathlib
+p=pathlib.Path(sys.argv[1]); c=configparser.ConfigParser(); c.read(p)
+c.setdefault("global",{}); c["global"]["proxy"]=sys.argv[2]
+with p.open("w") as f: c.write(f)
+EOF
+  mkdir -p "$HOME/.docker"; python3 - "$HOME/.docker/config.json" "$url" "$np" <<'EOF'
+import sys,json,pathlib
+p=pathlib.Path(sys.argv[1]); d=json.loads(p.read_text()) if p.exists() and p.read_text().strip() else {}
+d.setdefault("proxies",{})["default"]={"httpProxy":sys.argv[2],"httpsProxy":sys.argv[2],"noProxy":sys.argv[3]}
+p.write_text(json.dumps(d,indent=2)+"\n")
+EOF
+  ok "user proxy: ~/.config/pip/pip.conf, ~/.docker/config.json"
+}
+
 # ============================================================================= 1. proxy
+# Applies one proxy URL everywhere that matters on a dev box:
+#   user:   ~/.zsh_proxy (shell env), git, ~/.npmrc, pip, docker client (~/.docker/config.json), VS Code (later step)
+#   system: sudo env_keep, apt, docker daemon (systemd drop-in), snap
+# Everything created here is marked in $STATE_DIR so `--no-proxy` can cleanly remove it again.
+DEFAULT_NO_PROXY="localhost,127.0.0.1,::1,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16,.svc,.cluster.local,.local"
 if want proxy; then
 step "Proxy"
 if [[ "$PROXY_MODE" == "ask" ]]; then
-  read -r -p "  Configure an HTTP proxy for shell, VS Code, git and npm? [y/N] " ans
+  read -r -p "  Configure an HTTP proxy for shell, git, npm, pip, docker, apt, snap and VS Code? [y/N] " ans
   if [[ "${ans,,}" == "y" ]]; then
     read -r -p "  Proxy URL [http://127.0.0.1:3129]: " PROXY_URL; PROXY_URL="${PROXY_URL:-http://127.0.0.1:3129}"; PROXY_MODE="yes"
+    read -r -p "  NO_PROXY list [$DEFAULT_NO_PROXY]: " NP; NP="${NP:-$DEFAULT_NO_PROXY}"
   else PROXY_MODE="no"; fi
 fi
+NP="${NP:-$DEFAULT_NO_PROXY}"
 if [[ "$PROXY_MODE" == "yes" ]]; then
-  read -r -p "  NO_PROXY list [localhost,127.0.0.1,::1,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16,.svc,.cluster.local]: " NP
-  NP="${NP:-localhost,127.0.0.1,::1,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16,.svc,.cluster.local}"
+  # --- user level ---
   cat > "$HOME/.zsh_proxy" <<EOF
-# HTTP proxy for this machine (not committed to dotfiles). Remove this file to disable.
+# HTTP proxy for this machine (not committed to dotfiles). Delete this file (or rerun install.sh --no-proxy) to disable.
 export HTTP_PROXY="$PROXY_URL"
 export HTTPS_PROXY="$PROXY_URL"
 export http_proxy="$PROXY_URL"
@@ -132,12 +166,43 @@ EOF
   # shellcheck disable=SC1090
   source "$HOME/.zsh_proxy"
   git config --global http.proxy "$PROXY_URL"; git config --global https.proxy "$PROXY_URL"
-  { grep -v -E '^(proxy|https-proxy)=' "$HOME/.npmrc" 2>/dev/null || true; echo "proxy=$PROXY_URL"; echo "https-proxy=$PROXY_URL"; } > "$HOME/.npmrc.tmp" && mv "$HOME/.npmrc.tmp" "$HOME/.npmrc"
-  echo "$PROXY_URL" > "$STATE_DIR/proxy"
-  ok "proxy written to ~/.zsh_proxy, git config and ~/.npmrc (VS Code gets it in the vscode-config step)"
+  { grep -v -E '^(proxy|https-proxy|noproxy)=' "$HOME/.npmrc" 2>/dev/null || true
+    echo "proxy=$PROXY_URL"; echo "https-proxy=$PROXY_URL"; echo "noproxy=$NP"; } > "$HOME/.npmrc.tmp" && mv "$HOME/.npmrc.tmp" "$HOME/.npmrc"
+  ok "user proxy: ~/.zsh_proxy, git, ~/.npmrc"
+  # --- system level (sudo) ---
+  if sudo -n true 2>/dev/null || sudo -v; then
+    printf 'Defaults env_keep += "HTTP_PROXY HTTPS_PROXY NO_PROXY http_proxy https_proxy no_proxy"\n' | sudo tee /etc/sudoers.d/90-keep-proxy-env >/dev/null
+    sudo chmod 0440 /etc/sudoers.d/90-keep-proxy-env; sudo visudo -cf /etc/sudoers.d/90-keep-proxy-env >/dev/null || { sudo rm -f /etc/sudoers.d/90-keep-proxy-env; die "sudoers drop-in failed validation"; }
+    # Pipeline-Depth 0 + Queue-Mode access: sequential requests, kinder to corporate/local proxies that 502 under parallel load
+    printf 'Acquire::http::Proxy "%s";\nAcquire::https::Proxy "%s";\nAcquire::http::Pipeline-Depth "0";\nAcquire::Queue-Mode "access";\n' "$PROXY_URL" "$PROXY_URL" | sudo tee /etc/apt/apt.conf.d/80proxy >/dev/null
+    ok "system proxy: sudo keeps proxy env, apt (/etc/apt/apt.conf.d/80proxy)"
+    if have docker && have systemctl && [[ -d /run/systemd/system ]]; then
+      sudo mkdir -p /etc/systemd/system/docker.service.d
+      printf '[Service]\nEnvironment="HTTP_PROXY=%s"\nEnvironment="HTTPS_PROXY=%s"\nEnvironment="http_proxy=%s"\nEnvironment="https_proxy=%s"\nEnvironment="NO_PROXY=%s"\nEnvironment="no_proxy=%s"\n' \
+        "$PROXY_URL" "$PROXY_URL" "$PROXY_URL" "$PROXY_URL" "$NP" "$NP" | sudo tee /etc/systemd/system/docker.service.d/http-proxy.conf >/dev/null
+      sudo systemctl daemon-reload && sudo systemctl restart docker && ok "docker daemon proxy (service restarted)"
+    else info "docker daemon not managed here (no docker or no systemd); client proxy is set"; fi
+    if have snap; then sudo snap set system proxy.http="$PROXY_URL" proxy.https="$PROXY_URL" && ok "snap proxy"; fi
+  else warn "no sudo: skipped apt/sudoers/docker-daemon/snap proxy"; fi
+  echo "$PROXY_URL" > "$STATE_DIR/proxy"; echo "$NP" > "$STATE_DIR/no_proxy"
+  apply_user_app_proxy
 else
-  rm -f "$HOME/.zsh_proxy" "$STATE_DIR/proxy"; git config --global --unset http.proxy 2>/dev/null || true; git config --global --unset https.proxy 2>/dev/null || true
-  ok "no proxy"
+  if [[ -f "$STATE_DIR/proxy" ]]; then   # we configured a proxy earlier -> remove it everywhere
+    rm -f "$HOME/.zsh_proxy"
+    git config --global --unset http.proxy 2>/dev/null || true; git config --global --unset https.proxy 2>/dev/null || true
+    [[ -f "$HOME/.npmrc" ]] && sed -i -E '/^(proxy|https-proxy|noproxy)=/d' "$HOME/.npmrc"
+    [[ -f "$HOME/.config/pip/pip.conf" ]] && sed -i -E '/^proxy *=/d' "$HOME/.config/pip/pip.conf"
+    [[ -f "$HOME/.docker/config.json" ]] && python3 - "$HOME/.docker/config.json" <<'EOF'
+import sys,json,pathlib
+p=pathlib.Path(sys.argv[1]); d=json.loads(p.read_text()); d.get("proxies",{}).pop("default",None); p.write_text(json.dumps(d,indent=2)+"\n")
+EOF
+    if sudo -n true 2>/dev/null || sudo -v; then
+      sudo rm -f /etc/sudoers.d/90-keep-proxy-env /etc/apt/apt.conf.d/80proxy /etc/systemd/system/docker.service.d/http-proxy.conf
+      have systemctl && [[ -d /run/systemd/system ]] && have docker && { sudo systemctl daemon-reload; sudo systemctl restart docker; } || true
+      have snap && sudo snap unset system proxy.http proxy.https || true
+    fi
+    rm -f "$STATE_DIR/proxy" "$STATE_DIR/no_proxy"; ok "proxy removed everywhere"
+  else ok "no proxy"; fi
 fi
 fi
 
@@ -146,12 +211,13 @@ if want prereqs && [[ $SKIP_APT -eq 0 ]]; then
 step "System packages (sudo)"
 sudo -v || die "sudo is required for apt/snap steps (or rerun with --skip-apt)"
 ( while true; do sudo -n true; sleep 50; kill -0 "$$" || exit; done 2>/dev/null & )   # keep sudo alive
-sudo apt-get update -qq
-sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq \
+apt_retry update -qq
+apt_retry install -y -qq \
   git curl wget unzip tar xz-utils build-essential ca-certificates gnupg \
   zsh tmux fzf ripgrep jq xclip xdotool x11-utils fontconfig \
-  python3 python3-pip python3-venv ibus >/dev/null
+  python3 python3-pip python3-venv rsync >/dev/null
 ok "apt packages installed"
+apply_user_app_proxy
 fi
 
 # ============================================================================= 3. Ghostty
@@ -159,8 +225,8 @@ if want ghostty; then
 step "Ghostty"
 if have ghostty; then info "ghostty $(ghostty --version 2>/dev/null | head -1 | awk '{print $2}') already installed"
 else
-  have snap || die "snap not found; install Ghostty manually: https://ghostty.org/docs/install/binary"
-  sudo snap install ghostty --classic; ok "ghostty installed via snap"
+  if have snap && [[ -d /run/systemd/system ]]; then sudo snap install ghostty --classic; ok "ghostty installed via snap"
+  else warn "snap/systemd not available (container?) - skipping Ghostty; install it from https://ghostty.org/docs/install/binary"; fi
 fi
 fi
 
@@ -172,7 +238,7 @@ else
   sudo install -d -m 0755 /etc/apt/keyrings
   curl -fsSL https://packages.microsoft.com/keys/microsoft.asc | sudo gpg --dearmor -o /etc/apt/keyrings/packages.microsoft.gpg
   echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/packages.microsoft.gpg] https://packages.microsoft.com/repos/code stable main" | sudo tee /etc/apt/sources.list.d/vscode.list >/dev/null
-  sudo apt-get update -qq && sudo apt-get install -y -qq code >/dev/null; ok "VS Code installed from Microsoft apt repo"
+  apt_retry update -qq && apt_retry install -y -qq code >/dev/null; ok "VS Code installed from Microsoft apt repo"
 fi
 fi
 
@@ -205,7 +271,7 @@ if want zsh; then
 step "oh-my-zsh, powerlevel10k, plugins"
 ZSH_DIR="$HOME/.oh-my-zsh"; ZSH_CUSTOM="$ZSH_DIR/custom"
 if [[ ! -d "$ZSH_DIR" ]]; then
-  RUNZSH=no CHSH=no KEEP_ZSHRC=yes sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" >/dev/null; ok "oh-my-zsh installed"
+  tmp="$(mktemp)"; fetch https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh "$tmp"; RUNZSH=no CHSH=no KEEP_ZSHRC=yes sh "$tmp" >/dev/null 2>&1; rm -f "$tmp"; ok "oh-my-zsh installed"
 else info "oh-my-zsh present"; fi
 git_clone_or_pull https://github.com/romkatv/powerlevel10k.git "$ZSH_CUSTOM/themes/powerlevel10k"
 git_clone_or_pull https://github.com/zsh-users/zsh-autosuggestions "$ZSH_CUSTOM/plugins/zsh-autosuggestions"
@@ -213,7 +279,7 @@ git_clone_or_pull https://github.com/zsh-users/zsh-syntax-highlighting "$ZSH_CUS
 git_clone_or_pull https://github.com/MichaelAquilina/zsh-you-should-use "$ZSH_CUSTOM/plugins/you-should-use"
 git_clone_or_pull https://github.com/fdellwing/zsh-bat "$ZSH_CUSTOM/plugins/zsh-bat"
 # fzf shell bindings (~/.fzf.zsh is sourced by .zshrc)
-if [[ ! -f "$HOME/.fzf.zsh" ]]; then git_clone_or_pull https://github.com/junegunn/fzf.git "$HOME/.fzf"; "$HOME/.fzf/install" --key-bindings --completion --no-update-rc --no-bash --no-fish >/dev/null; ok "fzf keybindings"; fi
+if [[ ! -f "$HOME/.fzf.zsh" ]]; then git_clone_or_pull https://github.com/junegunn/fzf.git "$HOME/.fzf"; "$HOME/.fzf/install" --key-bindings --completion --no-update-rc --no-bash --no-fish >/dev/null 2>&1; ok "fzf keybindings"; fi
 # tmux plugin manager + tmux-power theme
 git_clone_or_pull https://github.com/tmux-plugins/tpm "$HOME/.tmux/plugins/tpm"
 git_clone_or_pull https://github.com/wfxr/tmux-power "$HOME/tmux-power"
@@ -223,10 +289,10 @@ fi
 if want node; then
 step "Runtimes: nvm + Node LTS, uv (Python tools), Go $GO_VER"
 export NVM_DIR="$HOME/.nvm"
-if [[ ! -s "$NVM_DIR/nvm.sh" ]]; then curl -fsSL https://raw.githubusercontent.com/nvm-sh/nvm/master/install.sh | PROFILE=/dev/null bash >/dev/null; ok "nvm installed"; fi
+if [[ ! -s "$NVM_DIR/nvm.sh" ]]; then tmp="$(mktemp)"; fetch https://raw.githubusercontent.com/nvm-sh/nvm/master/install.sh "$tmp"; PROFILE=/dev/null bash "$tmp" >/dev/null; rm -f "$tmp"; ok "nvm installed"; fi
 # shellcheck disable=SC1091
-source "$NVM_DIR/nvm.sh"; nvm install --lts >/dev/null 2>&1 && nvm alias default 'lts/*' >/dev/null; ok "node $(node --version)"
-if ! have uv; then curl -fsSL https://astral.sh/uv/install.sh | UV_NO_MODIFY_PATH=1 sh >/dev/null 2>&1; ok "uv installed"; else info "uv present"; fi
+source "$NVM_DIR/nvm.sh"; retry 3 nvm install --lts >/dev/null 2>&1 && nvm alias default 'lts/*' >/dev/null; ok "node $(node --version)"
+if ! have uv; then tmp="$(mktemp)"; fetch https://astral.sh/uv/install.sh "$tmp"; UV_NO_MODIFY_PATH=1 retry 3 sh "$tmp" >/dev/null 2>&1; rm -f "$tmp"; ok "uv installed"; else info "uv present"; fi
 if [[ -x "$HOME/.local/go/bin/go" ]] && "$HOME/.local/go/bin/go" version | grep -q "$GO_VER"; then info "$GO_VER present"
 else
   tmp="$(mktemp -d)"; fetch "https://go.dev/dl/$GO_VER.linux-amd64.tar.gz" "$tmp/go.tgz"
@@ -251,7 +317,7 @@ gh_bin atuin     "https://github.com/atuinsh/atuin/releases/download/$ATUIN_VER/
 gh_bin zellij    "https://github.com/zellij-org/zellij/releases/download/$ZELLIJ_VER/zellij-x86_64-unknown-linux-musl.tar.gz" tgz
 gh_bin glow      "https://github.com/charmbracelet/glow/releases/download/v$GLOW_VER/glow_${GLOW_VER}_Linux_x86_64.tar.gz" tgz
 gh_bin lazydocker "https://github.com/jesseduffield/lazydocker/releases/download/v$LAZYDOCKER_VER/lazydocker_${LAZYDOCKER_VER}_Linux_x86_64.tar.gz" tgz
-if have uv && ! have sqlfluff; then uv tool install -q sqlfluff && ok "sqlfluff (uv tool)"; fi
+if have uv && ! have sqlfluff; then retry 3 uv tool install -q sqlfluff && ok "sqlfluff (uv tool)"; fi
 # bat theme matching tokyonight
 mkdir -p "$(bat --config-dir)/themes"
 fetch https://raw.githubusercontent.com/folke/tokyonight.nvim/main/extras/sublime/tokyonight_night.tmTheme "$(bat --config-dir)/themes/tokyonight_night.tmTheme"; bat cache --build >/dev/null; ok "bat theme tokyonight_night"
@@ -271,17 +337,24 @@ install_file "$DOTFILES/tmux/.tmux.conf" "$HOME/.tmux.conf"
 install_file "$DOTFILES/ghostty/config"  "$HOME/.config/ghostty/config"
 git_clone_or_pull https://github.com/sahaj-b/ghostty-cursor-shaders "$HOME/.config/ghostty/shaders"
 git_clone_or_pull https://github.com/hackr-sh/ghostty-shaders        "$HOME/.config/ghostty/shaders-bg"
+# upstream moved the .glsl files into shaders/ghostty/ (Oct 2026); the config references shaders/<name>.glsl, so link them
+if [[ -d "$HOME/.config/ghostty/shaders/ghostty" ]]; then
+  for f in "$HOME/.config/ghostty/shaders/ghostty/"*.glsl; do ln -sf "ghostty/$(basename "$f")" "$HOME/.config/ghostty/shaders/$(basename "$f")"; done
+  info "cursor shaders linked from shaders/ghostty/"
+fi
+[[ -f "$HOME/.config/ghostty/shaders/cursor_warp.glsl" ]] || warn "cursor_warp.glsl not found; check https://github.com/sahaj-b/ghostty-cursor-shaders layout"
 have ghostty && { ghostty +validate-config >/dev/null && ok "ghostty config valid"; }
 # neovim (LazyVim)
-mkdir -p "$HOME/.config/nvim"; backup "$HOME/.config/nvim/lazy-lock.json"
+mkdir -p "$HOME/.config/nvim"
+cmp -s "$DOTFILES/nvim/lazy-lock.json" "$HOME/.config/nvim/lazy-lock.json" 2>/dev/null || backup "$HOME/.config/nvim/lazy-lock.json"
 rsync -a --exclude='.git' "$DOTFILES/nvim/" "$HOME/.config/nvim/"; ok "nvim config synced"
 mkdir -p "$HOME/.config/nvim/spell"
 if [[ ! -s "$HOME/.config/nvim/spell/vi.utf-8.spl" ]]; then
   tmp="$(mktemp -d)"; fetch https://raw.githubusercontent.com/LibreOffice/dictionaries/master/vi/vi_VN.dic "$tmp/vi_VN.dic"; fetch https://raw.githubusercontent.com/LibreOffice/dictionaries/master/vi/vi_VN.aff "$tmp/vi_VN.aff"
   nvim --headless -u NONE "+mkspell! $HOME/.config/nvim/spell/vi $tmp/vi_VN" +qa >/dev/null 2>&1; rm -rf "$tmp"; ok "Vietnamese spell file built"
 fi
-info "syncing Neovim plugins (first run takes a few minutes)..."
-nvim --headless "+Lazy! sync" +qa >/dev/null 2>&1 || warn "Lazy sync reported errors; open nvim and run :Lazy sync"
+info "installing Neovim plugins at the versions pinned in lazy-lock.json (first run takes a few minutes)..."
+nvim --headless "+Lazy! restore" +qa >/dev/null 2>&1 || warn "Lazy restore reported errors; open nvim and run :Lazy restore"
 nvim --headless -c "Lazy load mason.nvim" -c "MasonInstall gopls gofumpt goimports delve codelldb prettier" -c qa >/dev/null 2>&1 || true
 ln -sf "$HOME/.local/share/nvim/mason/bin/tree-sitter" "$LOCAL_BIN/tree-sitter" 2>/dev/null || true
 ok "nvim plugins + Mason packages"
@@ -311,23 +384,23 @@ fi
 # ============================================================================= 11. VS Code settings + extensions
 if want vscode-config && have code; then
 step "VS Code settings, keybindings, extensions"
-install_file "$DOTFILES/vscode/settings.json"    "$HOME/.config/Code/User/settings.json"
-install_file "$DOTFILES/vscode/keybindings.json" "$HOME/.config/Code/User/keybindings.json"
+# settings.json = repo file + placeholder expansion + optional proxy lines, rendered to a temp file so reruns detect "unchanged"
+VSC_TMP="$(mktemp)"; sed "s|/home/USER|$HOME|g" "$DOTFILES/vscode/settings.json" > "$VSC_TMP"
 if [[ -f "$STATE_DIR/proxy" ]]; then
-  python3 - "$HOME/.config/Code/User/settings.json" "$(cat "$STATE_DIR/proxy")" <<'EOF'
-import sys,pathlib,re
+  python3 - "$VSC_TMP" "$(cat "$STATE_DIR/proxy")" <<'EOF'
+import sys,pathlib
 p=pathlib.Path(sys.argv[1]); s=p.read_text(); url=sys.argv[2]
-s=re.sub(r'\n\s*"http\.proxy(Support)?": "[^"]*",','',s)
-s=s.replace('{',f'{{\n    "http.proxy": "{url}",\n    "http.proxySupport": "override",',1)
-p.write_text(s)
+p.write_text(s.replace('{',f'{{\n    "http.proxy": "{url}",\n    "http.proxySupport": "override",',1))
 EOF
-  ok "proxy added to VS Code settings"
+  info "settings.json rendered with http.proxy"
 fi
+install_file "$VSC_TMP" "$HOME/.config/Code/User/settings.json"; rm -f "$VSC_TMP"
+install_file "$DOTFILES/vscode/keybindings.json" "$HOME/.config/Code/User/keybindings.json"
 installed="$(code --list-extensions 2>/dev/null || true)"
 while read -r ext; do
   [[ -z "$ext" || "$ext" == \#* ]] && continue
   if grep -qix "$ext" <<<"$installed"; then continue; fi
-  code --install-extension "$ext" --force >/dev/null 2>&1 && info "extension: $ext" || warn "could not install extension $ext"
+  retry 2 code --install-extension "$ext" --force >/dev/null 2>&1 && info "extension: $ext" || warn "could not install extension $ext"
 done < "$DOTFILES/vscode/extensions.txt"
 ok "VS Code extensions synced ($(wc -l < "$DOTFILES/vscode/extensions.txt") listed)"
 fi
@@ -364,8 +437,8 @@ fi
 # ============================================================================= 14. default shell
 if want shell; then
 step "Default shell"
-if [[ "$(getent passwd "$USER" | cut -d: -f7)" != "$(command -v zsh)" ]]; then
-  chsh -s "$(command -v zsh)" && note_relogin "default shell changed to zsh"
+if [[ "$(getent passwd "$(id -un)" | cut -d: -f7)" != "$(command -v zsh)" ]]; then
+  sudo chsh -s "$(command -v zsh)" "$(id -un)" && note_relogin "default shell changed to zsh"
 else info "already zsh"; fi
 fi
 
@@ -379,7 +452,7 @@ cat <<EOF
   Local extras:  ~/.zsh_local for machine-specific aliases (not in the repo)
 
   Things that need a LOGOUT or REBOOT before they fully work:
-    - default shell -> zsh (new terminals), fonts in Ghostty/VS Code, GNOME autostart of ghostty-ime-watch
+    - fonts in Ghostty/VS Code, GNOME autostart of ghostty-ime-watch
     - Ghostty from snap: start it once from the app grid so GNOME registers it
 EOF
 for n in "${NEEDS_RELOGIN[@]:-}"; do [[ -n "$n" ]] && echo "    - $n"; done

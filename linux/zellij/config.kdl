@@ -196,16 +196,16 @@ keybinds {
     shared_except "locked" {
         // --- vim-zellij-navigator: Ctrl+hjkl đi xuyên nvim <-> zellij (MOVE mode chuyển sang Ctrl+b) ---
         bind "Ctrl h" {
-            MessagePlugin "file:$HOME/.config/zellij/plugins/vim-zellij-navigator.wasm" { name "move_focus_or_tab"; payload "left"; move_mod "ctrl"; };
+            MessagePlugin "file:/home/USER/.config/zellij/plugins/vim-zellij-navigator.wasm" { name "move_focus_or_tab"; payload "left"; move_mod "ctrl"; };
         }
         bind "Ctrl j" {
-            MessagePlugin "file:$HOME/.config/zellij/plugins/vim-zellij-navigator.wasm" { name "move_focus"; payload "down"; move_mod "ctrl"; };
+            MessagePlugin "file:/home/USER/.config/zellij/plugins/vim-zellij-navigator.wasm" { name "move_focus"; payload "down"; move_mod "ctrl"; };
         }
         bind "Ctrl k" {
-            MessagePlugin "file:$HOME/.config/zellij/plugins/vim-zellij-navigator.wasm" { name "move_focus"; payload "up"; move_mod "ctrl"; };
+            MessagePlugin "file:/home/USER/.config/zellij/plugins/vim-zellij-navigator.wasm" { name "move_focus"; payload "up"; move_mod "ctrl"; };
         }
         bind "Ctrl l" {
-            MessagePlugin "file:$HOME/.config/zellij/plugins/vim-zellij-navigator.wasm" { name "move_focus_or_tab"; payload "right"; move_mod "ctrl"; };
+            MessagePlugin "file:/home/USER/.config/zellij/plugins/vim-zellij-navigator.wasm" { name "move_focus_or_tab"; payload "right"; move_mod "ctrl"; };
         }
         bind "Ctrl g" { SwitchToMode "Locked"; }
         bind "Ctrl q" { Quit; }
