@@ -20,22 +20,22 @@
     {
         "key": "z 1",
         "command": "editor.foldLevel1",
-        "when": "editorTextFocus && neovim.init && neovim.mode == 'normal'"
+        "when": "editorTextFocus && vim.active && vim.mode == 'Normal'"
     },
     {
         "key": "z 2",
         "command": "editor.foldLevel2",
-        "when": "editorTextFocus && neovim.init && neovim.mode == 'normal'"
+        "when": "editorTextFocus && vim.active && vim.mode == 'Normal'"
     },
     {
         "key": "z 0",
         "command": "editor.foldAll",
-        "when": "editorTextFocus && neovim.init && neovim.mode == 'normal'"
+        "when": "editorTextFocus && vim.active && vim.mode == 'Normal'"
     },
     {
         "key": "z r",
         "command": "editor.unfoldAll",
-        "when": "editorTextFocus && neovim.init && neovim.mode == 'normal'"
+        "when": "editorTextFocus && vim.active && vim.mode == 'Normal'"
     },
     // Move to the previous/next editor.
     {
@@ -138,16 +138,5 @@
     //   "key": "cmd+enter",
     //   "command": "filesExplorer.openFilePreserveFocus",
     //   "when": "explorerViewletVisible && filesExplorerFocus && !explorerResourceIsFolder && !inputFocus"
-    // },,
-    // ----- vscode-neovim: Space mở whichkey (menu kiểu LazyVim đã có trong settings) -----
-    {
-        "key": "space",
-        "command": "whichkey.show",
-        "when": "editorTextFocus && neovim.init && neovim.mode == 'normal'"
-    },
-    {
-        "key": "space",
-        "command": "whichkey.show",
-        "when": "editorTextFocus && neovim.init && neovim.mode == 'visual'"
-    }
+    // },
 ]

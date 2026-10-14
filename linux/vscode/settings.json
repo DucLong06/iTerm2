@@ -231,14 +231,6 @@
     // VIM — core options
     // ===========================================================================
     "vim.leader": "<Space>",
-    // ===== vscode-neovim (2026-10-06): Neovim thật xử lý normal/visual mode, dùng chung config LazyVim =====
-    "vscode-neovim.neovimExecutablePaths.linux": "/opt/nvim-linux-x86_64/bin/nvim",
-    "vscode-neovim.compositeKeys": { "jk": { "command": "vscode-neovim.escape" } },  // jk thoát Insert
-    "vscode-neovim.useCtrlKeysForNormalMode": true,
-    "vscode-neovim.statusLineItems": ["statusline", "cmd", "msg"],  // mode lấy từ statusline của nvim (-- NORMAL -- / -- INSERT --)
-    "vscode-neovim.useCtrlKeysForInsertMode": true,
-    "extensions.experimental.affinity": { "asvetliakov.vscode-neovim": 1 },        // chạy ở process riêng, mượt hơn
-    "editor.cursorSmoothCaretAnimation": "off",
     // ----- Thêm 2026-10-06: trải nghiệm vim gần Neovim hơn -----
     "vim.highlightedyank.enable": true,        // nháy sáng đoạn vừa yank
     "vim.highlightedyank.duration": 150,

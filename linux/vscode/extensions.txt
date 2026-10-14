@@ -3,7 +3,6 @@ aaron-bond.better-comments
 alexcvzz.vscode-sqlite
 alfredbirk.tailwind-documentation
 anthropic.claude-code
-asvetliakov.vscode-neovim
 batisteo.vscode-django
 bierner.markdown-mermaid
 bierner.markdown-preview-github-styles
@@ -67,6 +66,7 @@ tomoki1207.pdf
 typescriptteam.native-preview
 usernamehw.errorlens
 vscode-icons-team.vscode-icons
+vscodevim.vim
 vspacecode.vspacecode
 vspacecode.whichkey
 vue.volar
