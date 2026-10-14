@@ -2,7 +2,7 @@
 
 | Platform | What | Where |
 |---|---|---|
-| Linux (Ubuntu) | Ghostty + zsh/powerlevel10k + Neovim (LazyVim) + VS Code (vscode-neovim) + zellij + CLI tools, **one-click installer** | [`linux/`](linux/) |
+| Linux (Ubuntu) | Ghostty + zsh/powerlevel10k + Neovim (LazyVim) + VS Code (VSCodeVim + whichkey) + zellij + CLI tools, **one-click installer** | [`linux/`](linux/) |
 | macOS | iTerm2 + zsh/powerlevel10k + VS Code settings | this README (below), `setting.json`, `keybindings.json`, `.zshrc` |
 
 ## Linux one-click setup

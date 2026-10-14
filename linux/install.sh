@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # =============================================================================
 #  One-click Linux (Ubuntu/Debian) terminal + editor setup
-#  Ghostty + zsh/powerlevel10k + Neovim (LazyVim) + VS Code (vscode-neovim)
+#  Ghostty + zsh/powerlevel10k + Neovim (LazyVim) + VS Code (VSCodeVim + whichkey)
 #  + zellij/tmux + modern CLI tools (eza, bat, zoxide, atuin, yazi, ...)
 #
 #  Author : DucLong06 <https://github.com/DucLong06>
@@ -465,7 +465,7 @@ cat <<'EOF'
     - Ghostty:   theme/padding/cursor shaders are active. Ctrl+Shift+, reloads the config.
     - zsh:       powerlevel10k prompt; run `p10k configure` if you want another style.
     - Neovim:    `nvim` -> :checkhealth lazyvim. Tools: fd, lazygit, rg are on PATH.
-    - VS Code:   vscode-neovim + whichkey (Space). Reload window if the status bar shows no mode.
+    - VS Code:   VSCodeVim + whichkey (Space opens the LazyVim-style menu, jk leaves Insert mode).
     - zellij:    `zellij` (status bar with key hints), `zellij -l dev` for the nvim+git layout.
     - atuin:     Ctrl+R searches history; `atuin import auto` pulls in old zsh history.
     - gssh/ssh:  `ssh user@host` ships autosuggestions + highlighting to the remote session.
