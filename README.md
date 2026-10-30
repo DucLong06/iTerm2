@@ -3,7 +3,8 @@
 | Platform | What | Where |
 |---|---|---|
 | Linux (Ubuntu) | Ghostty + zsh/powerlevel10k + Neovim (LazyVim) + VS Code (VSCodeVim + whichkey) + zellij + CLI tools, **one-click installer** | [`linux/`](linux/) |
-| macOS | iTerm2 + zsh/powerlevel10k + VS Code settings | this README (below), `setting.json`, `keybindings.json`, `.zshrc` |
+| macOS | Same terminal stack as Linux (Ghostty + zsh/p10k + Neovim + zellij/tmux + CLI tools) via Homebrew, **one-click installer**, no proxy | [`mac/`](mac/) |
+| macOS (old) | iTerm2 + powerlevel9k + VS Code settings | this README (below), `setting.json`, `keybindings.json`, `.zshrc` |
 
 ## Linux one-click setup
 
@@ -35,9 +36,25 @@ tmux/.tmux.conf       tpm + tmux-power
 bin/, autostart/      ghostty-ime-watch (English IME inside Ghostty)
 ```
 
+## macOS one-click setup
+
+```bash
+git clone https://github.com/DucLong06/iTerm2.git ~/dotfiles
+cd ~/dotfiles/mac
+./install.sh
+```
+
+Personal machine, so no proxy step. In order: Homebrew packages (Ghostty, JetBrainsMono Nerd Font, neovim, zellij, tmux, lazygit, fd, eza, bat, zoxide, fastfetch, delta, yazi, tldr, atuin, glow, lazydocker, uv, go) → oh-my-zsh + powerlevel10k + plugins → nvm/Node → bat theme + git/delta → configs → gssh.
+
+- Mac-specific files: `mac/zsh/.zshrc` (Homebrew paths, conda if present) and `mac/ghostty/config` (same look as Linux + left Option = Alt for zellij/nvim).
+- Shared with Linux, read from `linux/`: `.p10k.zsh`, `nvim/`, `zellij/`, `tmux/.tmux.conf`.
+- Idempotent, backups as `*.bak-<date>` (the old iTerm2 `~/.zshrc` included). `--skip-brew`, `--only configs,gssh` (see `--list-steps`).
+- `~/.zsh_local` holds machine-only settings; on first run it picks up the Google Cloud SDK if it is in `~/Downloads/google-cloud-sdk`.
+- No IME watcher on macOS: use System Settings → Keyboard → Input Sources → "Automatically switch to a document's input source".
+
 ---
 
-# macOS: Setup iTerm2
+# macOS (old): Setup iTerm2
 
 ## 1. Install iTerm2
 ```bash
