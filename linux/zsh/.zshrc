@@ -76,6 +76,7 @@ ZSH_THEME="powerlevel10k/powerlevel10k"
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
 plugins=(git
+        fzf-tab
         zsh-autosuggestions 
         zsh-syntax-highlighting
         you-should-use 
@@ -88,6 +89,16 @@ plugins=(git
         )
 
 source $ZSH/oh-my-zsh.sh
+
+# fzf-tab: Tab opens an fzf menu with previews (< and > switch between completion groups)
+zstyle ':completion:*:git-checkout:*' sort false
+zstyle ':completion:*:descriptions' format '[%d]'
+zstyle ':completion:*' list-colors ${(s.:.)LS_COLORS}
+zstyle ':completion:*' menu no
+zstyle ':fzf-tab:*' switch-group '<' '>'
+zstyle ':fzf-tab:complete:(cd|z|ls|ll|la|eza):*' fzf-preview 'eza -1 --color=always --icons $realpath'
+zstyle ':fzf-tab:complete:(cat|bat|nvim|vim|vi|less):*' fzf-preview '[[ -d $realpath ]] && eza -1 --color=always --icons $realpath || bat --color=always --style=numbers --line-range=:200 $realpath'
+zstyle ':fzf-tab:complete:kill:argument-rest' fzf-preview 'ps -o pid,user,%cpu,%mem,command -p $word'
 
 # User configuration
 
