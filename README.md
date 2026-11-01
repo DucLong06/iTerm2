@@ -14,7 +14,7 @@ cd ~/dotfiles/linux
 ./install.sh            # asks whether to configure an HTTP proxy, then installs everything
 ```
 
-What it does, in order: system packages → Ghostty (snap) → VS Code (apt) → XPipe (.deb) → Neovim → fonts → oh-my-zsh + powerlevel10k + plugins → nvm/Node, uv, Go → CLI tools into `~/.local/bin` (lazygit, fd, eza, bat, zoxide, fastfetch, delta, yazi, tldr, atuin, zellij, glow, lazydocker) → config files (zsh, Ghostty + cursor/background shaders, LazyVim, zellij + zjstatus, tmux) → VS Code settings/keybindings/extensions → Ghostty IME auto-switch (ibus, X11) → gssh → default shell.
+What it does, in order: system packages → Ghostty (snap) → VS Code (apt) → XPipe (.deb) → Neovim → fonts → oh-my-zsh + powerlevel10k + plugins → nvm/Node, uv, Go → CLI tools into `~/.local/bin` (lazygit, fd, eza, bat, zoxide, fastfetch, delta, yazi, tldr, atuin, zellij, glow, lazydocker) → config files (zsh, Ghostty + cursor/background shaders, LazyVim, zellij + zjstatus, tmux) → VS Code settings/keybindings/extensions → Ghostty IME auto-switch (ibus, X11) → Ghostty as default terminal (Ctrl+Alt+T via x-terminal-emulator/xdg-terminal-exec, Nautilus right-click via nautilus-open-any-terminal) → gssh → default shell.
 
 - Idempotent: safe to re-run. Replaced files are backed up as `*.bak-<date>`.
 - After it finishes it prints what needs a **logout/reboot** (default shell, fonts, GNOME autostart). Reboot, then run `./install.sh --skip-apt` once more to verify.

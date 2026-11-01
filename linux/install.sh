@@ -45,6 +45,7 @@ BLESH_VER="v0.3.4"
 NERD_FONT_VER="v3.4.0"
 XPIPE_VER="24.10"
 MAPLE_FONT_VER="v7.9"
+NOAT_VER="0.8.3"   # nautilus-open-any-terminal
 
 # ----------------------------------------------------------------------------- ui helpers
 C_BLUE='\033[1;34m'; C_GREEN='\033[1;32m'; C_YELLOW='\033[1;33m'; C_RED='\033[1;31m'; C_DIM='\033[2m'; C_OFF='\033[0m'
@@ -108,7 +109,7 @@ while [[ $# -gt 0 ]]; do
     --no-proxy-list) NP="$2"; shift ;;
     --skip-apt)   SKIP_APT=1 ;;
     --only)       ONLY="$2"; shift ;;
-    --list-steps) printf '%s\n' prereqs proxy ghostty vscode xpipe neovim fonts zsh node tools configs vscode-config ime gssh shell summary; exit 0 ;;
+    --list-steps) printf '%s\n' prereqs proxy ghostty vscode xpipe neovim fonts zsh node tools configs vscode-config ime default-terminal gssh shell summary; exit 0 ;;
     -h|--help)    sed -n '2,16p' "$0"; exit 0 ;;
     *) die "unknown option: $1" ;;
   esac; shift
@@ -437,6 +438,51 @@ else
 fi
 fi
 
+# ============================================================================= 12b. Ghostty as the default terminal
+# Ctrl+Alt+T follows x-terminal-emulator (Ubuntu <= 24.04) or xdg-terminal-exec (newer GNOME).
+# Nautilus' right-click "Open in Terminal" comes from nautilus-extension-gnome-terminal, which is hardwired
+# to gnome-terminal, so it is swapped for nautilus-open-any-terminal set to ghostty.
+if want default-terminal; then
+step "Ghostty as default terminal (Ctrl+Alt+T, Nautilus right-click)"
+if ! have ghostty; then warn "ghostty not installed; skipped"
+else
+  GHOSTTY_BIN="$(command -v ghostty)"
+  GHOSTTY_DESKTOP=""
+  for d in "$HOME/.local/share/applications" /var/lib/snapd/desktop/applications /usr/share/applications; do
+    f="$(ls "$d"/*ghostty*.desktop 2>/dev/null | head -1 || true)"; [[ -n "$f" ]] && { GHOSTTY_DESKTOP="$(basename "$f")"; break; }
+  done
+  # xdg-terminal-exec: the user list wins over the system ones
+  if [[ -n "$GHOSTTY_DESKTOP" ]]; then
+    mkdir -p "$HOME/.config"; echo "$GHOSTTY_DESKTOP" > "$HOME/.config/xdg-terminals.list"; ok "xdg-terminal-exec -> $GHOSTTY_DESKTOP"
+  else warn "no ghostty .desktop file found; skipped ~/.config/xdg-terminals.list"; fi
+  # x-terminal-emulator (Debian alternatives)
+  if [[ $SKIP_APT -eq 0 ]] && have update-alternatives; then
+    sudo update-alternatives --install /usr/bin/x-terminal-emulator x-terminal-emulator "$GHOSTTY_BIN" 60 >/dev/null
+    sudo update-alternatives --set x-terminal-emulator "$GHOSTTY_BIN" >/dev/null; ok "x-terminal-emulator -> $GHOSTTY_BIN"
+  fi
+  # older GNOME key, harmless where the schema still exists
+  gsettings set org.gnome.desktop.default-applications.terminal exec ghostty 2>/dev/null || true
+  # Nautilus right-click
+  if have nautilus; then
+    if [[ $SKIP_APT -eq 0 ]]; then
+      apt_retry install -y -qq python3-nautilus >/dev/null
+      if dpkg -s nautilus-extension-gnome-terminal >/dev/null 2>&1; then
+        sudo DEBIAN_FRONTEND=noninteractive apt-get remove -y -qq nautilus-extension-gnome-terminal >/dev/null; ok "removed gnome-terminal's 'Open in Terminal' entry"
+      fi
+    fi
+    NOAT="https://raw.githubusercontent.com/Stunkymonkey/nautilus-open-any-terminal/$NOAT_VER/nautilus_open_any_terminal"
+    mkdir -p "$HOME/.local/share/nautilus-python/extensions" "$HOME/.local/share/glib-2.0/schemas"
+    fetch "$NOAT/nautilus_open_any_terminal.py" "$HOME/.local/share/nautilus-python/extensions/nautilus_open_any_terminal.py"
+    fetch "$NOAT/schemas/com.github.stunkymonkey.nautilus-open-any-terminal.gschema.xml" "$HOME/.local/share/glib-2.0/schemas/com.github.stunkymonkey.nautilus-open-any-terminal.gschema.xml"
+    glib-compile-schemas "$HOME/.local/share/glib-2.0/schemas"
+    if GSETTINGS_SCHEMA_DIR="$HOME/.local/share/glib-2.0/schemas" gsettings set com.github.stunkymonkey.nautilus-open-any-terminal terminal ghostty 2>/dev/null; then
+      nautilus -q >/dev/null 2>&1 || true
+      ok "Nautilus right-click 'Open in Ghostty' (nautilus-open-any-terminal $NOAT_VER)"
+    else warn "could not write the gsettings key (no desktop session?); rerun: ./install.sh --only default-terminal"; fi
+  else info "nautilus not installed; skipped right-click entry"; fi
+fi
+fi
+
 # ============================================================================= 13. gssh (ssh with highlighting on remotes)
 if want gssh; then
 step "gssh (ghostty-superpowers remote-ssh plugin only)"
@@ -487,6 +533,7 @@ cat <<'EOF'
     - zellij:    `zellij` (status bar with key hints), `zellij -l dev` for the nvim+git layout.
     - atuin:     Ctrl+R searches history; `atuin import auto` pulls in old zsh history.
     - gssh/ssh:  `ssh user@host` ships autosuggestions + highlighting to the remote session.
+    - Ghostty is the default terminal: Ctrl+Alt+T and Nautilus right-click 'Open in Ghostty'.
     - XPipe:     Settings -> Terminal -> Ghostty; Settings -> Sync -> your private git repo (same repo on every machine).
 EOF
 fi
