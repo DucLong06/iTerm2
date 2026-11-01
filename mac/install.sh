@@ -82,6 +82,7 @@ have brew || die "Homebrew not found after install"
 brew bundle --file=- <<'EOF'
 cask "ghostty"
 cask "font-jetbrains-mono-nerd-font"
+cask "font-maple-mono-nf"
 brew "git"
 brew "zsh"
 brew "tmux"
