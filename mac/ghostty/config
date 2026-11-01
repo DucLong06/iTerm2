@@ -1,5 +1,5 @@
-# === Theme: tự đổi theo chế độ sáng/tối của macOS (xem thử: ghostty +list-themes) ===
-theme = light:Catppuccin Latte,dark:TokyoNight Night
+# === Theme: luôn tối (prompt p10k và shader con trỏ được chỉnh cho nền tối). Xem thử: ghostty +list-themes ===
+theme = TokyoNight Night
 
 # === Font === (Maple Mono NF, thiếu glyph thì lấy từ JetBrainsMono)
 font-family = Maple Mono NF
@@ -23,7 +23,6 @@ cursor-style = bar
 adjust-cursor-thickness = 4
 cursor-opacity = 0.85
 custom-shader = shaders/cursor_warp.glsl
-custom-shader = shaders-bg/bloom.glsl
 custom-shader-animation = always
 
 # === Hành vi ===
@@ -49,4 +48,5 @@ quick-terminal-autohide = true
 keybind = shift+enter=text:\x1b\r
 
 # (tuỳ chọn) shader con trỏ khác: shaders/{cursor_tail,ripple_cursor,sonic_boom_cursor,cursor_sweep}.glsl
-# (tuỳ chọn) shader nền khác:     shaders-bg/{starfield,just-snow,bettercrt,retro-terminal,inside-the-matrix}.glsl
+# (tuỳ chọn) shader nền: shaders-bg/{bloom,starfield,just-snow,bettercrt,retro-terminal}.glsl
+#            (bloom làm cháy trắng chữ nếu dùng theme sáng)
