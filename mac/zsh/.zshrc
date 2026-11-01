@@ -28,8 +28,8 @@ zstyle ':completion:*:descriptions' format '[%d]'
 zstyle ':completion:*' list-colors ${(s.:.)LS_COLORS}
 zstyle ':completion:*' menu no
 zstyle ':fzf-tab:*' switch-group '<' '>'
-zstyle ':fzf-tab:complete:(cd|z|ls|ll|la|eza):*' fzf-preview 'eza -1 --color=always --icons $realpath'
-zstyle ':fzf-tab:complete:(cat|bat|nvim|vim|vi|less):*' fzf-preview '[[ -d $realpath ]] && eza -1 --color=always --icons $realpath || bat --color=always --style=numbers --line-range=:200 $realpath'
+zstyle ':fzf-tab:complete:(cd|z|ls|ll|la|eza):*' fzf-preview 'eza -1 --color=always --icons=always $realpath'
+zstyle ':fzf-tab:complete:(cat|bat|nvim|vim|vi|less):*' fzf-preview '[[ -d $realpath ]] && eza -1 --color=always --icons=always $realpath || bat --color=always --style=numbers --line-range=:200 $realpath'
 zstyle ':fzf-tab:complete:kill:argument-rest' fzf-preview 'ps -o pid,user,%cpu,%mem,command -p $word'
 
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
@@ -101,10 +101,10 @@ export PATH="$GOPATH/bin:$PATH"
 
 # === Modern CLI tools (Homebrew) ===
 eval "$(zoxide init zsh)"            # z <name> -> jump to a frequently used dir; zi -> pick with fzf
-alias ls='eza --icons --group-directories-first'
-alias ll='eza -l --icons --git --group-directories-first'
-alias la='eza -la --icons --git --group-directories-first'
-alias lt='eza --tree --level=2 --icons'
+alias ls='eza --icons=auto --group-directories-first'
+alias ll='eza -l --icons=auto --git --group-directories-first'
+alias la='eza -la --icons=auto --git --group-directories-first'
+alias lt='eza --tree --level=2 --icons=auto'
 alias cat='bat --paging=never'
 export BAT_THEME="tokyonight_night"
 export MANPAGER="sh -c 'col -bx | bat -l man -p'"
