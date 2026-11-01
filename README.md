@@ -1,149 +1,92 @@
-# Terminal & editor setup (macOS + Linux)
+# Dotfiles: Ghostty + zsh + Neovim cho macOS và Ubuntu
 
-| Platform | What | Where |
-|---|---|---|
-| Linux (Ubuntu) | Ghostty + zsh/powerlevel10k + Neovim (LazyVim) + VS Code (VSCodeVim + whichkey) + zellij + CLI tools, **one-click installer** | [`linux/`](linux/) |
-| macOS | Same terminal stack as Linux (Ghostty + zsh/p10k + Neovim + zellij/tmux + CLI tools) via Homebrew, **one-click installer**, no proxy | [`mac/`](mac/) |
-| macOS (old) | iTerm2 + powerlevel9k + VS Code settings | this README (below), `setting.json`, `keybindings.json`, `.zshrc` |
+Một lệnh cài là có cùng một terminal trên Mac và Ubuntu: Ghostty (TokyoNight, Maple Mono), zsh + powerlevel10k, Neovim (LazyVim), zellij và các tool dòng lệnh hiện đại.
 
-## Linux one-click setup
+![zellij -l dev: LazyVim bên trái, shell bên phải](docs/images/zellij.png)
+
+## Cài đặt
 
 ```bash
-git clone https://github.com/DucLong06/iTerm2.git ~/dotfiles
-cd ~/dotfiles/linux
-./install.sh            # asks whether to configure an HTTP proxy, then installs everything
+git clone https://github.com/DucLong06/iTerm2.git ~/dotfiles && ~/dotfiles/install.sh
 ```
 
-What it does, in order: system packages → Ghostty (snap) → VS Code (apt) → XPipe (.deb) → Neovim → fonts → oh-my-zsh + powerlevel10k + plugins → nvm/Node, uv, Go → CLI tools into `~/.local/bin` (lazygit, fd, eza, bat, zoxide, fastfetch, delta, yazi, tldr, atuin, zellij, glow, lazydocker) → config files (zsh, Ghostty + cursor/background shaders, LazyVim, zellij + zjstatus, tmux) → VS Code settings/keybindings/extensions → Ghostty IME auto-switch (ibus, X11) → Ghostty as default terminal (Ctrl+Alt+T via x-terminal-emulator/xdg-terminal-exec, Nautilus right-click via nautilus-open-any-terminal) → gssh → default shell.
+`install.sh` tự nhận ra macOS hay Linux rồi chạy `mac/install.sh` hoặc `linux/install.sh`.
 
-- Idempotent: safe to re-run. Replaced files are backed up as `*.bak-<date>`.
-- After it finishes it prints what needs a **logout/reboot** (default shell, fonts, GNOME autostart). Reboot, then run `./install.sh --skip-apt` once more to verify.
-- Proxy: answering **y** (or `--proxy URL`) applies the proxy to the shell (`~/.zsh_proxy`), git, npm, pip, docker client **and** daemon, apt, snap, `sudo` (env_keep) and VS Code. `--no-proxy` removes all of it again.
-- Options: `--proxy URL [--no-proxy-list LIST]`, `--no-proxy`, `--skip-apt`, `--only configs,vscode-config` (see `--list-steps`).
-- Tested on a clean Ubuntu 24.04 container behind a corporate proxy: `linux/test/run.sh --proxy http://proxy:port` (Ghostty/snap, docker daemon and the ibus watcher are skipped there with a warning, everything else runs end to end).
-- Machine-specific things stay out of git: `~/.zsh_proxy` (written by the proxy prompt) and `~/.zsh_local` (your own aliases).
+- **macOS:** dùng Homebrew (tự cài nếu chưa có). Máy sẽ hỏi mật khẩu khi cài Homebrew và XPipe.
+- **Ubuntu:** hỏi có dùng proxy không (Enter = không), cần `sudo`. Cài xong thì khởi động lại máy và chạy thêm một lần `~/dotfiles/install.sh --skip-apt`.
 
-Layout of `linux/`:
+Sau đó mở **Ghostty**. Chạy lại bao nhiêu lần cũng được: file nào bị thay đều có bản backup `*.bak-<ngày>` bên cạnh.
+
+| Muốn | Lệnh |
+|---|---|
+| Cập nhật | `cd ~/dotfiles && git pull && ./install.sh` |
+| Chỉ cài lại config | `./install.sh --only configs` |
+| Xem các bước | `./install.sh --list-steps` |
+
+## Trông như thế nào
+
+**Prompt + `lt`** (eza dạng cây, có icon và trạng thái git)
+
+![prompt](docs/images/prompt.png)
+
+**fzf-tab:** gõ `cd ` rồi bấm Tab, có khung xem trước
+
+![fzf-tab](docs/images/fzf-tab.png)
+
+**Config Ghostty** (`cat` = bat, có tô màu)
+
+![ghostty config](docs/images/ghostty-config.png)
+
+**`gd`** (git diff qua delta, hai cột)
+
+![delta](docs/images/delta.png)
+
+**`lazygit`**
+
+![lazygit](docs/images/lazygit.png)
+
+**`nvim`** (LazyVim)
+
+![nvim](docs/images/nvim.png)
+
+## Có gì trong bộ cài
+
+| Nhóm | Gồm |
+|---|---|
+| Terminal | Ghostty: TokyoNight Night, Maple Mono NF, nền trong suốt, con trỏ `cursor_warp`. Mac: Option trái = Alt, ``Cmd+` `` thả terminal xuống |
+| Shell | zsh + oh-my-zsh + powerlevel10k, autosuggestions, syntax-highlighting, fzf-tab, you-should-use |
+| Editor | Neovim + LazyVim (plugin ghim theo `lazy-lock.json`) |
+| Chia màn hình | zellij (thanh `zjstatus`, `Ctrl+hjkl` chuyển giữa nvim và pane), tmux |
+| Tool | eza, bat, zoxide, atuin, yazi, fzf, ripgrep, fd, lazygit, delta, lazydocker, glow, tldr, fastfetch |
+| Runtime | nvm + Node LTS, uv, Go |
+| SSH | gssh (ssh mang theo gợi ý + tô màu sang máy remote), XPipe |
+| Riêng Ubuntu | Ghostty là terminal mặc định (Ctrl+Alt+T, chuột phải trong Nautilus), tự chuyển bộ gõ trong Ghostty, proxy tuỳ chọn, cấu hình VS Code |
+
+## Lệnh hay dùng
+
+| Lệnh / phím | Làm gì |
+|---|---|
+| `ll`, `la`, `lt` | Liệt kê file (eza) |
+| `z <tên>` | Nhảy tới thư mục hay dùng |
+| `Ctrl+R` | Tìm lịch sử lệnh (atuin) |
+| `y` | Duyệt file bằng yazi, thoát thì `cd` theo |
+| `gd`, `lazygit` | Xem diff, quản lý git |
+| `zellij -l dev` | nvim + shell + git trong một cửa sổ |
+| `Cmd+Shift+,` | Nạp lại config Ghostty (Ubuntu: `Ctrl+Shift+,`) |
+
+## Tuỳ chỉnh
+
+- Cài đặt riêng của từng máy (alias, đường dẫn SDK…) để trong `~/.zsh_local`. File này không nằm trong repo.
+- Đổi theme: chạy `ghostty +list-themes` trong Ghostty để xem thử, rồi sửa dòng `theme` trong `mac/ghostty/config` hoặc `linux/ghostty/config`.
+- Đổi kiểu prompt: `p10k configure`.
+- XPipe: Settings → Terminal → Ghostty; Settings → Sync → trỏ tới một repo git **private** để đồng bộ host giữa các máy.
+
+## Cấu trúc repo
 
 ```
-install.sh            the installer
-zsh/.zshrc .p10k.zsh  shell + prompt
-ghostty/config        terminal (shaders are cloned by the installer)
-nvim/                 LazyVim config (lazy-lock.json pinned, Vietnamese spell file)
-vscode/               settings.json, keybindings.json, extensions.txt
-zellij/               config.kdl + layouts (zjstatus bar, nvim<->zellij Ctrl+hjkl)
-tmux/.tmux.conf       tpm + tmux-power
-bin/, autostart/      ghostty-ime-watch (English IME inside Ghostty)
+install.sh          chọn mac/ hoặc linux/
+mac/                install.sh, zsh/.zshrc, ghostty/config
+linux/              install.sh, zsh/, ghostty/, nvim/, zellij/, tmux/, vscode/ (nvim, zellij, tmux, p10k dùng chung cho Mac)
+docs/images/        ảnh trong README; tạo lại bằng: for t in docs/tapes/[!_]*.tape; do vhs "$t"; done
+docs/legacy-iterm2.md   hướng dẫn iTerm2 cũ
 ```
-
-## macOS one-click setup
-
-```bash
-git clone https://github.com/DucLong06/iTerm2.git ~/dotfiles
-cd ~/dotfiles/mac
-./install.sh
-```
-
-Personal machine, so no proxy step. In order: Homebrew packages (Ghostty, XPipe, JetBrainsMono Nerd Font, neovim, zellij, tmux, lazygit, fd, eza, bat, zoxide, fastfetch, delta, yazi, tldr, atuin, glow, lazydocker, uv, go) → oh-my-zsh + powerlevel10k + plugins → nvm/Node → bat theme + git/delta → configs → gssh.
-
-- Mac-specific files: `mac/zsh/.zshrc` (Homebrew paths, conda if present) and `mac/ghostty/config` (same look as Linux + left Option = Alt for zellij/nvim).
-- Shared with Linux, read from `linux/`: `.p10k.zsh`, `nvim/`, `zellij/`, `tmux/.tmux.conf`.
-- Idempotent, backups as `*.bak-<date>` (the old iTerm2 `~/.zshrc` included). `--skip-brew`, `--only configs,gssh` (see `--list-steps`).
-- `~/.zsh_local` holds machine-only settings; on first run it picks up the Google Cloud SDK if it is in `~/Downloads/google-cloud-sdk`.
-- XPipe (SSH/connection manager) comes from the vendor tap `xpipe-io/tap`; its .pkg asks for your password. In XPipe pick Ghostty under Settings → Terminal and point Settings → Sync at a **private** git repo to share connections across Mac/Linux/Windows.
-- No IME watcher on macOS: use System Settings → Keyboard → Input Sources → "Automatically switch to a document's input source".
-
----
-
-# macOS (old): Setup iTerm2
-
-## 1. Install iTerm2
-```bash
-brew install --cask iterm2
-```
-## 2. Change Theme
-Choice theme in [opensource iTerm2 color scheme](https://iterm2colorschemes.com/) and download  [preset’s file.](https://github.com/mbadolato/iTerm2-Color-Schemes/tree/master/schemes)
-```bash
-iTerm → Preferences → Profiles → Colors → Color presets → Import
-```
-```bash
-→  Color presets → preset’s file.
-```
-My theme [Cobalt Neon](https://github.com/mbadolato/iTerm2-Color-Schemes/blob/master/schemes/Cobalt%20Neon.itermcolors)
-## 3. Change font
-Choice [fonts](https://github.com/powerline/fonts) download and Install Font.
-```bash
-iTerm2 → Preferences → Profiles → Text → Change Font
-```
-## 4. Setup Zsh and Oh my Zsh
-```bash
-brew install zsh zsh-completions
-```
-```bash
-sh -c "$ (curl -fsSL https://raw.github.com/robbyrussell/oh-my-zsh/master/tools/install.sh)"
-```
-## 5. Setup theme Powerlevel9k Zsh
-```bash
-git clone https://github.com/bhilburn/powerlevel9k.git ~/.oh-my-zsh/custom/themes/powerlevel9k
-```
-Edit in `~/.zshrc`
-```bash
-ZSH_THEME="powerlevel9k/powerlevel9k"
-```
-## 6. Add autosuggestions
-### Option 1: Using autosuggestions
-```bash
-git clone https://github.com/zsh-users/zsh-autosuggestions $ZSH_CUSTOM/plugins/zsh-autosuggestions
-```
-Add plugins in `~/.zshrc`
-```bash
-plugins=(
-    …
-    zsh-autosuggestions
-)
-```
-
-### Option 2: Using fig
-```bash
-Link git: https://github.com/withfig/autocomplete
-```
-Install using `brew`
-```bash
-brew install fig
-```
-## 7. Highlight syntax
-```bash
-brew install zsh-syntax-highlighting
-```
-Add line in `~/.zshrc`
-```bash
-source /usr/local/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
-```
-## 8. Add conda to Zsh  
-Add line in `~/.zshrc`
-```bash
-# >>> conda initialize >>>
-# !! Contents within this block are managed by 'conda init' !!
-__conda_setup="$('/opt/homebrew/Caskroom/miniforge/base/bin/conda' 'shell.zsh' 'hook' 2> /dev/null)"
-if [ $? -eq 0 ]; then
-    eval "$__conda_setup"
-else
-    if [ -f "/opt/homebrew/Caskroom/miniforge/base/etc/profile.d/conda.sh" ]; then
-        . "/opt/homebrew/Caskroom/miniforge/base/etc/profile.d/conda.sh"
-    else
-        export PATH="/opt/homebrew/Caskroom/miniforge/base/bin:$PATH"
-    fi
-fi
-unset __conda_setup
-
-# <<< conda initialize <<<
-```
-## 9. Add tmux
-```bash
-brew install tmux
-```
-## 10. Other setup in theme
-[FULL `~/.zshrc`](./.zshrc)
-
-## 11. Install for vscode
-[Link download font: MesloLGS NF](https://github.com/romkatv/powerlevel10k/issues/671#issuecomment-621031981)
