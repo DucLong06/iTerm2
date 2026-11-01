@@ -1,4 +1,10 @@
-# === Font ===
+# Cùng giao diện với mac/ghostty/config; chỉ bỏ các dòng chỉ có tác dụng trên macOS.
+
+# === Theme: luôn tối (prompt p10k và shader con trỏ được chỉnh cho nền tối). Xem thử: ghostty +list-themes ===
+theme = TokyoNight Night
+
+# === Font === (Maple Mono NF, thiếu glyph thì lấy từ JetBrainsMono)
+font-family = Maple Mono NF
 font-family = JetBrainsMono Nerd Font
 font-size = 13
 font-feature = -calt
@@ -10,8 +16,14 @@ window-padding-balance = false
 split-divider-color = #202020
 unfocused-split-opacity = 0.7
 unfocused-split-fill = "#333333"
+background-opacity = 0.92
+# blur chỉ có tác dụng trên KDE; GNOME bỏ qua
+background-blur = 20
+# Gộp tab vào thanh tiêu đề (gần giống macos-titlebar-style = transparent)
+gtk-titlebar-style = tabs
 
 # === Con trỏ ===
+cursor-style = bar
 adjust-cursor-thickness = 4
 cursor-opacity = 0.85
 custom-shader = shaders/cursor_warp.glsl
@@ -21,9 +33,15 @@ custom-shader-animation = always
 scrollback-limit = 30000000
 copy-on-select = clipboard
 shell-integration-features = sudo,ssh-env,ssh-terminfo,title
+mouse-hide-while-typing = true
+confirm-close-surface = false
 
 # === Phím tắt ===
 keybind = shift+enter=text:\x1b\r
 
-# (tuỳ chọn, bỏ # để thử) theme = TokyoNight Night   -> xem danh sách: ghostty +list-themes
-# (tuỳ chọn) custom-shader = shaders-bg/bloom.glsl  -> bộ shader nền trong thư mục shaders-bg
+# Quick terminal (Cmd+` trên Mac) cần Wayland layer-shell: chạy trên KDE/Hyprland/Sway, KHÔNG chạy trên GNOME.
+# keybind = global:ctrl+grave_accent=toggle_quick_terminal
+
+# (tuỳ chọn) shader con trỏ khác: shaders/{cursor_tail,ripple_cursor,sonic_boom_cursor,cursor_sweep}.glsl
+# (tuỳ chọn) shader nền: shaders-bg/{bloom,starfield,just-snow,bettercrt,retro-terminal}.glsl
+#            (bloom làm cháy trắng chữ nếu dùng theme sáng)
