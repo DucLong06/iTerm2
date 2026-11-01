@@ -44,6 +44,7 @@ LAZYDOCKER_VER="0.24.1"
 BLESH_VER="v0.3.4"
 NERD_FONT_VER="v3.4.0"
 XPIPE_VER="24.10"
+MAPLE_FONT_VER="v7.9"
 
 # ----------------------------------------------------------------------------- ui helpers
 C_BLUE='\033[1;34m'; C_GREEN='\033[1;32m'; C_YELLOW='\033[1;33m'; C_RED='\033[1;31m'; C_DIM='\033[2m'; C_OFF='\033[0m'
@@ -267,7 +268,11 @@ fi
 
 # ============================================================================= 6. Fonts
 if want fonts; then
-step "Fonts (JetBrainsMono Nerd Font for Ghostty, MesloLGS NF for powerlevel10k)"
+step "Fonts (Maple Mono NF + JetBrainsMono Nerd Font for Ghostty, MesloLGS NF for powerlevel10k)"
+if ! fc-list | grep -q "Maple Mono NF"; then
+  tmp="$(mktemp -d)"; fetch "https://github.com/subframe7536/maple-font/releases/download/$MAPLE_FONT_VER/MapleMono-NF-unhinted.zip" "$tmp/maple.zip"
+  unzip -qo "$tmp/maple.zip" -d "$FONT_DIR/MapleMonoNF" '*.ttf' && rm -rf "$tmp"; ok "Maple Mono NF"
+else info "Maple Mono NF present"; fi
 if ! fc-list | grep -q "JetBrainsMono Nerd Font"; then
   tmp="$(mktemp -d)"; fetch "https://github.com/ryanoasis/nerd-fonts/releases/download/$NERD_FONT_VER/JetBrainsMono.zip" "$tmp/jb.zip"
   unzip -qo "$tmp/jb.zip" -d "$FONT_DIR/JetBrainsMonoNerd" '*.ttf' && rm -rf "$tmp"; ok "JetBrainsMono Nerd Font"
