@@ -1,7 +1,12 @@
-# === Font ===
+# === Theme: tự đổi theo chế độ sáng/tối của macOS (xem thử: ghostty +list-themes) ===
+theme = light:Catppuccin Latte,dark:TokyoNight Night
+
+# === Font === (Maple Mono NF, thiếu glyph thì lấy từ JetBrainsMono)
+font-family = Maple Mono NF
 font-family = JetBrainsMono Nerd Font
 font-size = 13
 font-feature = -calt
+font-thicken = true
 
 # === Giao diện ===
 window-padding-x = 15, 5
@@ -10,27 +15,38 @@ window-padding-balance = false
 split-divider-color = #202020
 unfocused-split-opacity = 0.7
 unfocused-split-fill = "#333333"
+background-opacity = 0.92
+background-blur = 20
 
 # === Con trỏ ===
+cursor-style = bar
 adjust-cursor-thickness = 4
 cursor-opacity = 0.85
 custom-shader = shaders/cursor_warp.glsl
+custom-shader = shaders-bg/bloom.glsl
 custom-shader-animation = always
 
 # === Hành vi ===
 scrollback-limit = 30000000
 copy-on-select = clipboard
 shell-integration-features = sudo,ssh-env,ssh-terminfo,title
+window-save-state = always
+mouse-hide-while-typing = true
+confirm-close-surface = false
 
 # === macOS ===
 # Option trái = Alt (zellij dùng Alt f/n/i/..., nvim dùng <M-...>); Option phải vẫn gõ ký tự đặc biệt
 macos-option-as-alt = left
-macos-titlebar-style = tabs
-# (tuỳ chọn) Cmd+` bật/tắt Ghostty thả xuống từ bất kỳ app nào (macOS sẽ hỏi quyền Accessibility):
-# keybind = global:cmd+grave_accent=toggle_quick_terminal
+macos-titlebar-style = transparent
+macos-icon = xray
+
+# === Quick terminal: Cmd+` thả Ghostty xuống từ bất kỳ app nào (lần đầu macOS hỏi quyền Accessibility) ===
+keybind = global:cmd+grave_accent=toggle_quick_terminal
+quick-terminal-position = top
+quick-terminal-autohide = true
 
 # === Phím tắt ===
 keybind = shift+enter=text:\x1b\r
 
-# (tuỳ chọn, bỏ # để thử) theme = TokyoNight Night   -> xem danh sách: ghostty +list-themes
-# (tuỳ chọn) custom-shader = shaders-bg/bloom.glsl  -> bộ shader nền trong thư mục shaders-bg
+# (tuỳ chọn) shader con trỏ khác: shaders/{cursor_tail,ripple_cursor,sonic_boom_cursor,cursor_sweep}.glsl
+# (tuỳ chọn) shader nền khác:     shaders-bg/{starfield,just-snow,bettercrt,retro-terminal,inside-the-matrix}.glsl
