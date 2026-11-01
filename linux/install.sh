@@ -287,6 +287,7 @@ if [[ ! -d "$ZSH_DIR" ]]; then
 else info "oh-my-zsh present"; fi
 git_clone_or_pull https://github.com/romkatv/powerlevel10k.git "$ZSH_CUSTOM/themes/powerlevel10k"
 git_clone_or_pull https://github.com/zsh-users/zsh-autosuggestions "$ZSH_CUSTOM/plugins/zsh-autosuggestions"
+git_clone_or_pull https://github.com/Aloxaf/fzf-tab "$ZSH_CUSTOM/plugins/fzf-tab"
 git_clone_or_pull https://github.com/zsh-users/zsh-syntax-highlighting "$ZSH_CUSTOM/plugins/zsh-syntax-highlighting"
 git_clone_or_pull https://github.com/MichaelAquilina/zsh-you-should-use "$ZSH_CUSTOM/plugins/you-should-use"
 git_clone_or_pull https://github.com/fdellwing/zsh-bat "$ZSH_CUSTOM/plugins/zsh-bat"
