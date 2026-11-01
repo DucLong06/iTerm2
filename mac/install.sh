@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # =============================================================================
 #  One-click macOS terminal setup (personal machine, no proxy)
-#  Ghostty + zsh/powerlevel10k + Neovim (LazyVim) + zellij/tmux
+#  Ghostty + zsh/powerlevel10k + Neovim (LazyVim) + zellij/tmux + XPipe
 #  + modern CLI tools (eza, bat, zoxide, atuin, yazi, ...) via Homebrew
 #
 #  Author : DucLong06 <https://github.com/DucLong06>
@@ -79,8 +79,12 @@ if ! have brew; then
   for b in /opt/homebrew/bin/brew /usr/local/bin/brew; do [[ -x "$b" ]] && eval "$("$b" shellenv)" && break; done
 fi
 have brew || die "Homebrew not found after install"
+# XPipe (SSH/connection manager, syncs through a git repo) ships from its own tap; its .pkg asks for your password
+brew tap xpipe-io/tap >/dev/null
+brew trust xpipe-io/tap >/dev/null 2>&1 || true   # newer Homebrew refuses untrusted third-party taps
 brew bundle --file=- <<'EOF'
 cask "ghostty"
+cask "xpipe-io/tap/xpipe"
 cask "font-jetbrains-mono-nerd-font"
 cask "font-maple-mono-nf"
 brew "git"
@@ -237,5 +241,6 @@ cat <<EOF
     - zellij:    \`zellij\` (status bar with key hints), \`zellij -l dev\` for the nvim+git layout.
     - atuin:     Ctrl+R searches history; \`atuin import auto\` pulls in old zsh history.
     - gssh/ssh:  \`ssh user@host\` ships autosuggestions + highlighting to the remote session.
+    - XPipe:     Settings -> Terminal -> Ghostty; Settings -> Sync -> your private git repo (same repo on every machine).
 EOF
 fi
