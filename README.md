@@ -14,7 +14,7 @@ cd ~/dotfiles/linux
 ./install.sh            # asks whether to configure an HTTP proxy, then installs everything
 ```
 
-What it does, in order: system packages → Ghostty (snap) → VS Code (apt) → Neovim → fonts → oh-my-zsh + powerlevel10k + plugins → nvm/Node, uv, Go → CLI tools into `~/.local/bin` (lazygit, fd, eza, bat, zoxide, fastfetch, delta, yazi, tldr, atuin, zellij, glow, lazydocker) → config files (zsh, Ghostty + cursor/background shaders, LazyVim, zellij + zjstatus, tmux) → VS Code settings/keybindings/extensions → Ghostty IME auto-switch (ibus, X11) → gssh → default shell.
+What it does, in order: system packages → Ghostty (snap) → VS Code (apt) → XPipe (.deb) → Neovim → fonts → oh-my-zsh + powerlevel10k + plugins → nvm/Node, uv, Go → CLI tools into `~/.local/bin` (lazygit, fd, eza, bat, zoxide, fastfetch, delta, yazi, tldr, atuin, zellij, glow, lazydocker) → config files (zsh, Ghostty + cursor/background shaders, LazyVim, zellij + zjstatus, tmux) → VS Code settings/keybindings/extensions → Ghostty IME auto-switch (ibus, X11) → gssh → default shell.
 
 - Idempotent: safe to re-run. Replaced files are backed up as `*.bak-<date>`.
 - After it finishes it prints what needs a **logout/reboot** (default shell, fonts, GNOME autostart). Reboot, then run `./install.sh --skip-apt` once more to verify.
@@ -44,12 +44,13 @@ cd ~/dotfiles/mac
 ./install.sh
 ```
 
-Personal machine, so no proxy step. In order: Homebrew packages (Ghostty, JetBrainsMono Nerd Font, neovim, zellij, tmux, lazygit, fd, eza, bat, zoxide, fastfetch, delta, yazi, tldr, atuin, glow, lazydocker, uv, go) → oh-my-zsh + powerlevel10k + plugins → nvm/Node → bat theme + git/delta → configs → gssh.
+Personal machine, so no proxy step. In order: Homebrew packages (Ghostty, XPipe, JetBrainsMono Nerd Font, neovim, zellij, tmux, lazygit, fd, eza, bat, zoxide, fastfetch, delta, yazi, tldr, atuin, glow, lazydocker, uv, go) → oh-my-zsh + powerlevel10k + plugins → nvm/Node → bat theme + git/delta → configs → gssh.
 
 - Mac-specific files: `mac/zsh/.zshrc` (Homebrew paths, conda if present) and `mac/ghostty/config` (same look as Linux + left Option = Alt for zellij/nvim).
 - Shared with Linux, read from `linux/`: `.p10k.zsh`, `nvim/`, `zellij/`, `tmux/.tmux.conf`.
 - Idempotent, backups as `*.bak-<date>` (the old iTerm2 `~/.zshrc` included). `--skip-brew`, `--only configs,gssh` (see `--list-steps`).
 - `~/.zsh_local` holds machine-only settings; on first run it picks up the Google Cloud SDK if it is in `~/Downloads/google-cloud-sdk`.
+- XPipe (SSH/connection manager) comes from the vendor tap `xpipe-io/tap`; its .pkg asks for your password. In XPipe pick Ghostty under Settings → Terminal and point Settings → Sync at a **private** git repo to share connections across Mac/Linux/Windows.
 - No IME watcher on macOS: use System Settings → Keyboard → Input Sources → "Automatically switch to a document's input source".
 
 ---

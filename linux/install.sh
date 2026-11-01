@@ -43,6 +43,7 @@ GLOW_VER="3.0.0"
 LAZYDOCKER_VER="0.24.1"
 BLESH_VER="v0.3.4"
 NERD_FONT_VER="v3.4.0"
+XPIPE_VER="24.10"
 
 # ----------------------------------------------------------------------------- ui helpers
 C_BLUE='\033[1;34m'; C_GREEN='\033[1;32m'; C_YELLOW='\033[1;33m'; C_RED='\033[1;31m'; C_DIM='\033[2m'; C_OFF='\033[0m'
@@ -106,7 +107,7 @@ while [[ $# -gt 0 ]]; do
     --no-proxy-list) NP="$2"; shift ;;
     --skip-apt)   SKIP_APT=1 ;;
     --only)       ONLY="$2"; shift ;;
-    --list-steps) printf '%s\n' prereqs proxy ghostty vscode neovim fonts zsh node tools configs vscode-config ime gssh shell summary; exit 0 ;;
+    --list-steps) printf '%s\n' prereqs proxy ghostty vscode xpipe neovim fonts zsh node tools configs vscode-config ime gssh shell summary; exit 0 ;;
     -h|--help)    sed -n '2,16p' "$0"; exit 0 ;;
     *) die "unknown option: $1" ;;
   esac; shift
@@ -239,6 +240,17 @@ else
   curl -fsSL https://packages.microsoft.com/keys/microsoft.asc | sudo gpg --dearmor -o /etc/apt/keyrings/packages.microsoft.gpg
   echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/packages.microsoft.gpg] https://packages.microsoft.com/repos/code stable main" | sudo tee /etc/apt/sources.list.d/vscode.list >/dev/null
   apt_retry update -qq && apt_retry install -y -qq code >/dev/null; ok "VS Code installed from Microsoft apt repo"
+fi
+fi
+
+# ============================================================================= 4b. XPipe (SSH/connection manager, syncs through a git repo)
+if want xpipe && [[ $SKIP_APT -eq 0 ]]; then
+step "XPipe $XPIPE_VER"
+if dpkg-query -W -f='${Version}' xpipe 2>/dev/null | grep -q "^${XPIPE_VER}"; then info "xpipe $XPIPE_VER already installed"
+else
+  tmp="$(mktemp -d)"; fetch "https://github.com/xpipe-io/xpipe/releases/download/$XPIPE_VER/xpipe-installer-linux-x86_64.deb" "$tmp/xpipe.deb"
+  chmod 755 "$tmp"; chmod 644 "$tmp/xpipe.deb"   # apt's _apt user must be able to read the local .deb
+  apt_retry install -y -qq "$tmp/xpipe.deb" >/dev/null; rm -rf "$tmp"; ok "xpipe $XPIPE_VER installed"
 fi
 fi
 
@@ -469,5 +481,6 @@ cat <<'EOF'
     - zellij:    `zellij` (status bar with key hints), `zellij -l dev` for the nvim+git layout.
     - atuin:     Ctrl+R searches history; `atuin import auto` pulls in old zsh history.
     - gssh/ssh:  `ssh user@host` ships autosuggestions + highlighting to the remote session.
+    - XPipe:     Settings -> Terminal -> Ghostty; Settings -> Sync -> your private git repo (same repo on every machine).
 EOF
 fi
