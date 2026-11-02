@@ -19,8 +19,13 @@ unfocused-split-fill = "#333333"
 background-opacity = 0.92
 # blur chỉ có tác dụng trên KDE; GNOME bỏ qua
 background-blur = 20
-# Gộp tab vào thanh tiêu đề (gần giống macos-titlebar-style = transparent)
+# Kiểu macos-titlebar-style = transparent: gộp tab vào thanh tiêu đề, thanh tiêu đề lấy đúng màu nền TokyoNight
+# và không có bóng/viền ngăn với vùng terminal
 gtk-titlebar-style = tabs
+window-theme = ghostty
+gtk-toolbar-style = flat
+# Thay cho font-thicken (chỉ macOS): bỏ hinting cho nét chữ đầy và mềm như trên Mac
+freetype-load-flags = no-hinting
 
 # === Con trỏ ===
 cursor-style = bar
