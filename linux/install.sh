@@ -5,7 +5,7 @@
 #  + zellij/tmux + modern CLI tools (eza, bat, zoxide, atuin, yazi, ...)
 #
 #  Author : DucLong06 <https://github.com/DucLong06>
-#  Source : https://github.com/DucLong06/iTerm2  (linux/ directory)
+#  Source : https://github.com/DucLong06/terminal-setup  (linux/ directory)
 #
 #  Usage  : ./install.sh [--proxy URL [--no-proxy-list LIST] | --no-proxy] [--skip-apt] [--only STEP[,STEP]] [--list-steps]
 #           --proxy applies the URL to shell, git, npm, pip, docker (client + daemon), apt, snap, sudo env and VS Code.
@@ -119,7 +119,7 @@ while [[ $# -gt 0 ]]; do
 done
 want() { [[ -z "$ONLY" ]] || [[ ",$ONLY," == *",$1,"* ]]; }
 
-[[ "$(uname -s)" == "Linux" ]] || die "This script is for Linux. For macOS use the root of the repo (iTerm2 setup)."
+[[ "$(uname -s)" == "Linux" ]] || die "This script is for Linux. For macOS use the root of the repo (mac/install.sh)."
 [[ "$(uname -m)" == "x86_64" ]] || die "Only x86_64 binaries are pinned here. Adjust the *_VER urls for $(uname -m)."
 
 # pip + docker client proxy need python3 (for safe merging); called once python3 is guaranteed (after apt step)

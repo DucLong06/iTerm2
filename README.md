@@ -7,7 +7,7 @@ Một lệnh cài là có cùng một terminal trên Mac và Ubuntu: Ghostty (To
 ## Cài đặt
 
 ```bash
-git clone https://github.com/DucLong06/iTerm2.git ~/dotfiles && ~/dotfiles/install.sh
+git clone https://github.com/DucLong06/terminal-setup.git ~/dotfiles && ~/dotfiles/install.sh
 ```
 
 `install.sh` tự nhận ra macOS hay Linux rồi chạy `mac/install.sh` hoặc `linux/install.sh`.
