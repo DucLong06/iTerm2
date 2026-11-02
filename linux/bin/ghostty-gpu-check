@@ -1,0 +1,35 @@
+#!/bin/bash
+# Kiểm tra Ghostty đang vẽ bằng GPU hay CPU (llvmpipe = Mesa giả lập GPU bằng CPU, làm cả máy chậm).
+#   ghostty-gpu-check          -> kiểm tra tiến trình Ghostty mới nhất
+#   ghostty-gpu-check <pid>    -> kiểm tra một tiến trình cụ thể
+G=$'\e[32m'; R=$'\e[31m'; Y=$'\e[33m'; B=$'\e[1m'; D=$'\e[2m'; O=$'\e[0m'
+pid="${1:-$(pgrep -n -x ghostty)}"
+[[ -n "$pid" && -d /proc/$pid ]] || { echo "${R}Không thấy tiến trình Ghostty nào đang chạy${O}"; exit 1; }
+
+exe="$(readlink "/proc/$pid/exe")"
+maps="$(cat "/proc/$pid/maps" 2>/dev/null)"
+llvm="$(cat /proc/"$pid"/task/*/comm 2>/dev/null | grep -c llvmpipe)"
+cpu="$(top -b -n 2 -d 2 -p "$pid" </dev/null | awk '/^top -/{n++} n==2 && $1=="'"$pid"'"{print $9}')"
+if   grep -q libEGL_nvidia <<<"$maps" || grep -q libGLX_nvidia <<<"$maps"; then drv="NVIDIA (driver độc quyền)"
+elif grep -qE 'radeonsi|iris|crocus|i965|nouveau|zink' <<<"$maps";     then drv="Mesa (GPU thật)"
+else drv="không rõ"; fi
+
+printf '%s\n' "${B}Ghostty GPU check${O}  ${D}pid $pid${O}"
+printf '  %-14s %s\n' "Binary"   "${exe/#"$HOME"/\~}"
+printf '  %-14s %s\n' "Version" "$("$exe" --version 2>/dev/null | head -1)"
+case "$exe" in /snap/*) printf '  %-14s %s\n' "Install" "${R}snap (Mesa riêng, không nạp được driver NVIDIA)${O}" ;;
+               *)       printf '  %-14s %s\n' "Install" "${G}build native, dùng libglvnd của hệ thống${O}" ;; esac
+printf '  %-14s %s\n' "GL driver"  "$drv"
+if (( llvm > 0 )); then printf '  %-14s %s\n' "llvmpipe" "${R}$llvm luồng -> đang vẽ bằng CPU${O}"
+else                    printf '  %-14s %s\n' "llvmpipe" "${G}0 luồng${O}"; fi
+printf '  %-14s %s\n' "CPU" "${cpu:-?}%"
+if command -v nvidia-smi >/dev/null; then
+  line="$(nvidia-smi --query-gpu=name,driver_version --format=csv,noheader 2>/dev/null | head -1)"
+  vram="$(nvidia-smi 2>/dev/null | awk -v p="$pid" '$5==p {print $(NF-1)}')"
+  printf '  %-14s %s\n' "GPU" "$line"
+  if [[ -n "$vram" ]]; then printf '  %-14s %s\n' "nvidia-smi" "${G}Ghostty dùng $vram VRAM${O}"
+  else printf '  %-14s %s\n' "nvidia-smi" "${Y}không thấy Ghostty trong danh sách tiến trình GPU${O}"; fi
+fi
+echo
+if (( llvm == 0 )) && [[ "$drv" != "không rõ" ]]; then echo "${G}${B}✔ Ghostty đang vẽ bằng GPU${O}"
+else echo "${R}${B}✘ Ghostty đang vẽ bằng CPU${O} ${D}(gỡ bản snap, chạy lại: ./install.sh --only ghostty)${O}"; fi

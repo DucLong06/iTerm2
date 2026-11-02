@@ -23,7 +23,8 @@ cursor-style = bar
 adjust-cursor-thickness = 4
 cursor-opacity = 0.85
 custom-shader = shaders/cursor_warp.glsl
-custom-shader-animation = always
+# true = chỉ chạy animation khi cửa sổ đang focus; always còn vẽ lại liên tục cả khi chạy nền (tốn GPU/pin)
+custom-shader-animation = true
 
 # === Hành vi ===
 scrollback-limit = 30000000

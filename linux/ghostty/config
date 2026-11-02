@@ -19,9 +19,18 @@ unfocused-split-fill = "#333333"
 background-opacity = 0.92
 # blur chỉ có tác dụng trên KDE; GNOME bỏ qua
 background-blur = 20
-# Kiểu macos-titlebar-style = transparent: gộp tab vào thanh tiêu đề, thanh tiêu đề lấy đúng màu nền TokyoNight
-# và không có bóng/viền ngăn với vùng terminal
-gtk-titlebar-style = tabs
+# Thanh tiêu đề lấy đúng màu nền TokyoNight và không có bóng/viền ngăn với vùng terminal.
+# KHÔNG dùng gtk-titlebar-style = tabs: tab chiếm gần hết thanh tiêu đề, kéo lên đó là kéo tab chứ không kéo cửa sổ
+# (chỉ còn góc cạnh nút đóng là kéo được). native = thanh tiêu đề thường, tab nằm ở dòng riêng khi có >1 tab.
+gtk-titlebar-style = native
+# Dòng phụ dưới tiêu đề hiện thư mục hiện tại; tab gọn theo nội dung như Mac
+window-subtitle = working-directory
+gtk-wide-tabs = false
+# giữ titlebar khi phóng to, nếu không sẽ mất nút thu nhỏ/khôi phục/đóng
+gtk-titlebar-hide-when-maximized = false
+# Kích thước cửa sổ mới (số cột x số dòng)
+window-width = 120
+window-height = 34
 window-theme = ghostty
 gtk-toolbar-style = flat
 # Thay cho font-thicken (chỉ macOS): bỏ hinting cho nét chữ đầy và mềm như trên Mac
@@ -32,7 +41,8 @@ cursor-style = bar
 adjust-cursor-thickness = 4
 cursor-opacity = 0.85
 custom-shader = shaders/cursor_warp.glsl
-custom-shader-animation = always
+# true = chỉ chạy animation khi cửa sổ đang focus; always còn vẽ lại liên tục cả khi chạy nền (tốn GPU/pin)
+custom-shader-animation = true
 
 # === Hành vi ===
 scrollback-limit = 30000000
@@ -40,9 +50,18 @@ copy-on-select = clipboard
 shell-integration-features = sudo,ssh-env,ssh-terminfo,title
 mouse-hide-while-typing = true
 confirm-close-surface = false
+# Lệnh chạy quá 10s mà đang ở cửa sổ khác thì bắn thông báo desktop khi xong (cần shell-integration)
+notify-on-command-finish = unfocused
+notify-on-command-finish-action = notify
+notify-on-command-finish-after = 10s
 
 # === Phím tắt ===
 keybind = shift+enter=text:\x1b\r
+# Ctrl+C copy khi đang bôi đen, không bôi đen thì vẫn gửi SIGINT như thường (performable)
+keybind = performable:ctrl+c=copy_to_clipboard
+# Gần giống Cmd+D / Cmd+Shift+D trên Mac. Không dùng Ctrl+D/Ctrl+W/Ctrl+V trơn: đó là EOF, xoá từ, visual-block của nvim
+keybind = ctrl+shift+d=new_split:right
+keybind = ctrl+shift+alt+d=new_split:down
 
 # Quick terminal (Cmd+` trên Mac) cần Wayland layer-shell: chạy trên KDE/Hyprland/Sway, KHÔNG chạy trên GNOME.
 # keybind = global:ctrl+grave_accent=toggle_quick_terminal

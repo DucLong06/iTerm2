@@ -1,0 +1,10 @@
+#!/bin/bash
+# Launcher cho Ghostty tự build (~/.local/opt/ghostty), luôn chạy bằng GPU.
+#   Ghostty vẽ bằng OpenGL qua libglvnd của hệ thống: máy chỉ có 1 GPU (NVIDIA, AMD hay Intel) thì dùng luôn GPU đó.
+#   Laptop hybrid (iGPU + NVIDIA driver độc quyền) thì mặc định iGPU thắng -> bật PRIME render offload sang NVIDIA.
+# (Bản snap cũ mang Mesa riêng, không nạp được driver NVIDIA nên rơi về llvmpipe = vẽ bằng CPU.)
+real="$HOME/.local/opt/ghostty/bin/ghostty"
+if [[ -e /proc/driver/nvidia/version ]] && cat /sys/class/drm/card*/device/vendor 2>/dev/null | grep -qv 0x10de; then
+  export __NV_PRIME_RENDER_OFFLOAD=1 __GLX_VENDOR_LIBRARY_NAME=nvidia __VK_LAYER_NV_optimus=NVIDIA_only
+fi
+exec "$real" "$@"

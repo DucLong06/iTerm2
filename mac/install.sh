@@ -5,7 +5,7 @@
 #  + modern CLI tools (eza, bat, zoxide, atuin, yazi, ...) via Homebrew
 #
 #  Author : DucLong06 <https://github.com/DucLong06>
-#  Source : https://github.com/DucLong06/iTerm2  (mac/ directory)
+#  Source : https://github.com/DucLong06/terminal-setup  (mac/ directory)
 #
 #  Usage  : ./install.sh [--skip-brew] [--only STEP[,STEP]] [--list-steps]
 #
