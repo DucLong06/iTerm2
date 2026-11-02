@@ -26,7 +26,8 @@ gtk-titlebar-style = native
 # Dòng phụ dưới tiêu đề hiện thư mục hiện tại; tab gọn theo nội dung như Mac; phóng to thì ẩn titlebar cho rộng chỗ
 window-subtitle = working-directory
 gtk-wide-tabs = false
-gtk-titlebar-hide-when-maximized = true
+# giữ titlebar khi phóng to, nếu không sẽ mất nút thu nhỏ/khôi phục/đóng
+gtk-titlebar-hide-when-maximized = false
 # Kích thước cửa sổ mới (số cột x số dòng)
 window-width = 120
 window-height = 34
@@ -40,7 +41,8 @@ cursor-style = bar
 adjust-cursor-thickness = 4
 cursor-opacity = 0.85
 custom-shader = shaders/cursor_warp.glsl
-custom-shader-animation = always
+# true = chỉ chạy animation khi cửa sổ đang focus; always còn vẽ lại liên tục cả khi chạy nền (tốn GPU/pin)
+custom-shader-animation = true
 
 # === Hành vi ===
 scrollback-limit = 30000000

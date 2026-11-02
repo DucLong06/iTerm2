@@ -26,6 +26,9 @@ mkdir -p "$STATE_DIR" "$LOCAL_BIN" "$FONT_DIR"
 export PATH="$LOCAL_BIN:$HOME/.local/go/bin:/opt/nvim-linux-x86_64/bin:$PATH"
 
 # ----------------------------------------------------------------------------- pinned versions
+GHOSTTY_VER="1.3.1"        # newest that builds on Ubuntu 24.04: 1.4 needs libadwaita >= 1.7 (noble has 1.5)
+ZIG_VER="0.15.2"           # minimum_zig_version of GHOSTTY_VER
+BLUEPRINT_VER="v0.16.0"    # blueprint-compiler for Ghostty's GTK UI (noble ships 0.12)
 NVIM_VER="v0.12.2"
 GO_VER="go1.27.1"
 LAZYGIT_VER="0.66.0"
@@ -225,12 +228,64 @@ fi
 
 # ============================================================================= 3. Ghostty
 if want ghostty; then
-step "Ghostty"
-if have ghostty; then info "ghostty $(ghostty --version 2>/dev/null | head -1 | awk '{print $2}') already installed"
+step "Ghostty $GHOSTTY_VER (built from source, GPU rendering)"
+# Not the snap: it bundles its own Mesa, cannot load the NVIDIA driver and falls back to llvmpipe (CPU rendering).
+# A native build uses the system libglvnd, so it renders on whatever GPU the system has.
+# Layout: ~/.local/opt/ghostty (zig install prefix) + ~/.local/bin/ghostty launcher (PRIME offload on hybrid NVIDIA).
+GHOSTTY_PREFIX="$HOME/.local/opt/ghostty"
+if [[ -x "$GHOSTTY_PREFIX/bin/ghostty" ]] && "$GHOSTTY_PREFIX/bin/ghostty" --version 2>/dev/null | head -1 | grep -q "$GHOSTTY_VER"; then
+  info "ghostty $GHOSTTY_VER already built"
 else
-  if have snap && [[ -d /run/systemd/system ]]; then sudo snap install ghostty --classic; ok "ghostty installed via snap"
-  else warn "snap/systemd not available (container?) - skipping Ghostty; install it from https://ghostty.org/docs/install/binary"; fi
+  if [[ $SKIP_APT -eq 0 ]]; then
+    apt_retry install -y -qq libgtk-4-dev libadwaita-1-dev gettext libxml2-utils python3-gi gir1.2-gtk-4.0 gir1.2-adw-1 patchelf >/dev/null
+  fi
+  ZIG_DIR="$HOME/.local/share/zig/zig-x86_64-linux-$ZIG_VER"
+  if [[ ! -x "$ZIG_DIR/zig" ]]; then
+    tmp="$(mktemp -d)"; fetch "https://ziglang.org/download/$ZIG_VER/zig-x86_64-linux-$ZIG_VER.tar.xz" "$tmp/zig.tar.xz"
+    mkdir -p "$(dirname "$ZIG_DIR")" && tar -C "$(dirname "$ZIG_DIR")" -xJf "$tmp/zig.tar.xz"; rm -rf "$tmp"; ok "zig $ZIG_VER"
+  fi
+  BP_DIR="$HOME/.local/share/blueprint-compiler-$BLUEPRINT_VER"
+  [[ -f "$BP_DIR/blueprint-compiler.py" ]] || git clone -q --depth 1 -b "$BLUEPRINT_VER" https://gitlab.gnome.org/GNOME/blueprint-compiler.git "$BP_DIR"
+  shim="$(mktemp -d)"   # the build calls blueprint-compiler from PATH
+  printf '#!/bin/sh\nexec python3 %s/blueprint-compiler.py "$@"\n' "$BP_DIR" > "$shim/blueprint-compiler"; chmod +x "$shim/blueprint-compiler"
+  tmp="$(mktemp -d)"; fetch "https://release.files.ghostty.org/$GHOSTTY_VER/ghostty-$GHOSTTY_VER.tar.gz" "$tmp/ghostty.tgz"
+  tar -C "$tmp" -xzf "$tmp/ghostty.tgz"
+  # zig's own fetcher chokes on some proxies (400 Bad Request): pull the deps with curl and seed zig's cache
+  mkdir -p "$tmp/deps"
+  grep -v '^git+' "$tmp/ghostty-$GHOSTTY_VER/build.zig.zon.txt" | while read -r u; do
+    fetch "$u" "$tmp/deps/$(basename "$u")" && "$ZIG_DIR/zig" fetch "$tmp/deps/$(basename "$u")" >/dev/null
+  done
+  # git+https deps (transitive, e.g. uucode via vaxis): clone the pinned commit with git, then seed the cache from the tree
+  grep '^git+' "$tmp/ghostty-$GHOSTTY_VER/build.zig.zon.txt" | while read -r u; do
+    repo="${u#git+}"; repo="${repo%%#*}"; rev="${u##*#}"; d="$tmp/deps/git-$rev"
+    git init -q "$d" && git -C "$d" fetch -q --depth 1 "$repo" "$rev" && git -C "$d" checkout -q FETCH_HEAD \
+      && rm -rf "$d/.git" && "$ZIG_DIR/zig" fetch "$d" >/dev/null
+  done
+  info "building ghostty $GHOSTTY_VER (a few minutes)..."
+  # gtk4-layer-shell is not packaged on 24.04 -> use the vendored copy
+  ( cd "$tmp/ghostty-$GHOSTTY_VER" && PATH="$shim:$PATH" "$ZIG_DIR/zig" build -p "$GHOSTTY_PREFIX" -Doptimize=ReleaseFast -fno-sys=gtk4-layer-shell )
+  # the vendored libgtk4-layer-shell.so lands in <prefix>/lib but RUNPATH points into the build's .zig-cache
+  patchelf --set-rpath '$ORIGIN/../lib:/usr/lib/x86_64-linux-gnu' "$GHOSTTY_PREFIX/bin/ghostty"
+  rm -rf "$tmp" "$shim"; ok "ghostty $GHOSTTY_VER -> $GHOSTTY_PREFIX"
 fi
+install_file "$DOTFILES/bin/ghostty" "$LOCAL_BIN/ghostty" 755
+# desktop entry + D-Bus/systemd activation (gtk-single-instance) from the prefix, pointed at the launcher
+mkdir -p "$HOME/.local/share/applications" "$HOME/.local/share/dbus-1/services" "$HOME/.local/share/systemd/user"
+sed "s|$GHOSTTY_PREFIX/bin/ghostty|$LOCAL_BIN/ghostty|" "$GHOSTTY_PREFIX/share/systemd/user/app-com.mitchellh.ghostty.service" \
+  > "$HOME/.local/share/systemd/user/app-com.mitchellh.ghostty.service"
+systemctl --user daemon-reload 2>/dev/null || true
+sed -e "s|^Exec=$GHOSTTY_PREFIX/bin/ghostty|Exec=$LOCAL_BIN/ghostty|" -e "s|^TryExec=.*|TryExec=$LOCAL_BIN/ghostty|" \
+  "$GHOSTTY_PREFIX/share/applications/com.mitchellh.ghostty.desktop" > "$HOME/.local/share/applications/com.mitchellh.ghostty.desktop"
+for f in "$GHOSTTY_PREFIX"/share/dbus-1/services/*.service; do
+  [[ -f "$f" ]] && sed "s|$GHOSTTY_PREFIX/bin/ghostty|$LOCAL_BIN/ghostty|" "$f" > "$HOME/.local/share/dbus-1/services/$(basename "$f")"
+done
+update-desktop-database "$HOME/.local/share/applications" 2>/dev/null || true
+# migrate away from the snap (CPU rendering)
+if have snap && snap list ghostty >/dev/null 2>&1; then
+  sudo snap remove ghostty && ok "removed ghostty snap"
+  rm -f "$HOME/.local/share/applications/ghostty_ghostty.desktop"
+fi
+hash -r
 fi
 
 # ============================================================================= 4. VS Code
@@ -363,16 +418,14 @@ if [[ -d "$HOME/.config/ghostty/shaders/ghostty" ]]; then
 fi
 [[ -f "$HOME/.config/ghostty/shaders/cursor_warp.glsl" ]] || warn "cursor_warp.glsl not found; check https://github.com/sahaj-b/ghostty-cursor-shaders layout"
 have ghostty && { ghostty +validate-config >/dev/null && ok "ghostty config valid"; }
-# xray icon (macos-icon = xray only works on macOS): copy the system .desktop under the same name into
-# ~/.local/share/applications (user entries win) with Icon= pointing at our png
+# xray icon (macos-icon = xray only works on macOS): point Icon= of the user .desktop (written by the Ghostty step) at our png
 install_file "$DOTFILES/ghostty/icons/ghostty-xray.png" "$HOME/.local/share/icons/ghostty-xray.png"
-for d in /var/lib/snapd/desktop/applications /usr/share/applications; do
-  f="$(ls "$d"/*ghostty*.desktop 2>/dev/null | head -1 || true)"; [[ -n "$f" ]] || continue
-  mkdir -p "$HOME/.local/share/applications"
-  sed "s|^Icon=.*|Icon=$HOME/.local/share/icons/ghostty-xray.png|" "$f" > "$HOME/.local/share/applications/$(basename "$f")"
+f="$HOME/.local/share/applications/com.mitchellh.ghostty.desktop"
+if [[ -f "$f" ]]; then
+  sed -i "s|^Icon=.*|Icon=$HOME/.local/share/icons/ghostty-xray.png|" "$f"
   update-desktop-database "$HOME/.local/share/applications" 2>/dev/null || true
-  ok "ghostty icon -> xray ($(basename "$f"))"; break
-done
+  ok "ghostty icon -> xray"
+fi
 # neovim (LazyVim)
 mkdir -p "$HOME/.config/nvim"
 cmp -s "$DOTFILES/nvim/lazy-lock.json" "$HOME/.config/nvim/lazy-lock.json" 2>/dev/null || backup "$HOME/.config/nvim/lazy-lock.json"
@@ -458,7 +511,7 @@ if ! have ghostty; then warn "ghostty not installed; skipped"
 else
   GHOSTTY_BIN="$(command -v ghostty)"
   GHOSTTY_DESKTOP=""
-  for d in "$HOME/.local/share/applications" /var/lib/snapd/desktop/applications /usr/share/applications; do
+  for d in "$HOME/.local/share/applications" /usr/share/applications; do
     f="$(ls "$d"/*ghostty*.desktop 2>/dev/null | head -1 || true)"; [[ -n "$f" ]] && { GHOSTTY_DESKTOP="$(basename "$f")"; break; }
   done
   # xdg-terminal-exec: the user list wins over the system ones
@@ -527,7 +580,6 @@ cat <<EOF
 
   Things that need a LOGOUT or REBOOT before they fully work:
     - fonts in Ghostty/VS Code, GNOME autostart of ghostty-ime-watch
-    - Ghostty from snap: start it once from the app grid so GNOME registers it
 EOF
 for n in "${NEEDS_RELOGIN[@]:-}"; do [[ -n "$n" ]] && echo "    - $n"; done
 cat <<'EOF'
