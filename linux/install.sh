@@ -269,6 +269,7 @@ else
   rm -rf "$tmp" "$shim"; ok "ghostty $GHOSTTY_VER -> $GHOSTTY_PREFIX"
 fi
 install_file "$DOTFILES/bin/ghostty" "$LOCAL_BIN/ghostty" 755
+install_file "$DOTFILES/bin/ghostty-gpu-check" "$LOCAL_BIN/ghostty-gpu-check" 755
 # desktop entry + D-Bus/systemd activation (gtk-single-instance) from the prefix, pointed at the launcher
 mkdir -p "$HOME/.local/share/applications" "$HOME/.local/share/dbus-1/services" "$HOME/.local/share/systemd/user"
 sed "s|$GHOSTTY_PREFIX/bin/ghostty|$LOCAL_BIN/ghostty|" "$GHOSTTY_PREFIX/share/systemd/user/app-com.mitchellh.ghostty.service" \

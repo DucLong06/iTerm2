@@ -49,6 +49,27 @@ Sau đó mở **Ghostty**. Chạy lại bao nhiêu lần cũng được: file n�
 
 ![nvim](docs/images/nvim.png)
 
+## Ubuntu: Ghostty chạy trên GPU
+
+Trên Ubuntu, Ghostty được build từ source thay vì cài bằng snap. Bản snap mang theo Mesa riêng nên không nạp được driver NVIDIA, phải vẽ bằng CPU (llvmpipe). Bản build native dùng driver của hệ thống nên vẽ bằng GPU thật.
+
+![ghostty-gpu-check: Ghostty vẽ bằng GPU NVIDIA, 0 luồng llvmpipe](docs/images/ghostty-gpu-check.png)
+
+Đo trên GTX 1070 Ti, driver 580, X11:
+
+| | Snap (Ghostty 1.4) | Build native (Ghostty 1.3.1) |
+|---|---|---|
+| Vẽ bằng | llvmpipe (CPU), 12 luồng | NVIDIA (`libEGL_nvidia`) |
+| CPU khi không gõ gì | ~766% (7–8 nhân) | ~0–3% |
+| Có trong `nvidia-smi` | không | có, ~25–45MiB VRAM |
+
+Kiểm tra trên máy của bạn bằng `ghostty-gpu-check`. Dòng cuối phải là `✔ Ghostty đang vẽ bằng GPU`.
+
+- **Chọn GPU:** máy chỉ có một GPU (NVIDIA, AMD hay Intel) thì Ghostty dùng luôn GPU đó. Laptop có cả iGPU và NVIDIA thì launcher `~/.local/bin/ghostty` bật PRIME offload để dùng card NVIDIA.
+- **Vì sao là 1.3.1:** Ghostty 1.4 cần libadwaita ≥ 1.7, còn Ubuntu 24.04 chỉ có 1.5. Bản build nằm ở `~/.local/opt/ghostty`.
+- **Vẫn báo vẽ bằng CPU:** gỡ snap bằng `sudo snap remove ghostty`, rồi chạy `./install.sh --only ghostty,default-terminal`.
+- **macOS** không gặp vấn đề này: Ghostty luôn vẽ bằng Metal (GPU). Shader con trỏ được đặt `custom-shader-animation = true` để chỉ chạy khi cửa sổ đang focus, đỡ tốn pin.
+
 ## Có gì trong bộ cài
 
 | Nhóm | Gồm |
@@ -60,7 +81,7 @@ Sau đó mở **Ghostty**. Chạy lại bao nhiêu lần cũng được: file n�
 | Tool | eza, bat, zoxide, atuin, yazi, fzf, ripgrep, fd, lazygit, delta, lazydocker, glow, tldr, fastfetch |
 | Runtime | nvm + Node LTS, uv, Go |
 | SSH | gssh (ssh mang theo gợi ý + tô màu sang máy remote), XPipe |
-| Riêng Ubuntu | Ghostty là terminal mặc định (Ctrl+Alt+T, chuột phải trong Nautilus), tự chuyển bộ gõ trong Ghostty, proxy tuỳ chọn, cấu hình VS Code |
+| Riêng Ubuntu | Ghostty build từ source, vẽ bằng GPU (`ghostty-gpu-check` để kiểm tra), là terminal mặc định (Ctrl+Alt+T, chuột phải trong Nautilus), tự chuyển bộ gõ trong Ghostty, proxy tuỳ chọn, cấu hình VS Code |
 
 ## Lệnh hay dùng
 
@@ -87,6 +108,8 @@ Sau đó mở **Ghostty**. Chạy lại bao nhiêu lần cũng được: file n�
 install.sh          chọn mac/ hoặc linux/
 mac/                install.sh, zsh/.zshrc, ghostty/config
 linux/              install.sh, zsh/, ghostty/, nvim/, zellij/, tmux/, vscode/ (nvim, zellij, tmux, p10k dùng chung cho Mac)
+linux/bin/          ghostty (launcher chọn GPU), ghostty-gpu-check, ghostty-ime-watch
 docs/images/        ảnh trong README; tạo lại bằng: for t in docs/tapes/[!_]*.tape; do vhs "$t"; done
+                    (ghostty-gpu-check.png là ảnh chụp cửa sổ Ghostty thật trên Ubuntu)
 docs/legacy-iterm2.md   hướng dẫn iTerm2 cũ
 ```
