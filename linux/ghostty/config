@@ -23,7 +23,7 @@ background-blur = 20
 # KHÔNG dùng gtk-titlebar-style = tabs: tab chiếm gần hết thanh tiêu đề, kéo lên đó là kéo tab chứ không kéo cửa sổ
 # (chỉ còn góc cạnh nút đóng là kéo được). native = thanh tiêu đề thường, tab nằm ở dòng riêng khi có >1 tab.
 gtk-titlebar-style = native
-# Dòng phụ dưới tiêu đề hiện thư mục hiện tại; tab gọn theo nội dung như Mac; phóng to thì ẩn titlebar cho rộng chỗ
+# Dòng phụ dưới tiêu đề hiện thư mục hiện tại; tab gọn theo nội dung như Mac
 window-subtitle = working-directory
 gtk-wide-tabs = false
 # giữ titlebar khi phóng to, nếu không sẽ mất nút thu nhỏ/khôi phục/đóng
