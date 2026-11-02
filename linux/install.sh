@@ -363,6 +363,16 @@ if [[ -d "$HOME/.config/ghostty/shaders/ghostty" ]]; then
 fi
 [[ -f "$HOME/.config/ghostty/shaders/cursor_warp.glsl" ]] || warn "cursor_warp.glsl not found; check https://github.com/sahaj-b/ghostty-cursor-shaders layout"
 have ghostty && { ghostty +validate-config >/dev/null && ok "ghostty config valid"; }
+# xray icon (macos-icon = xray only works on macOS): copy the system .desktop under the same name into
+# ~/.local/share/applications (user entries win) with Icon= pointing at our png
+install_file "$DOTFILES/ghostty/icons/ghostty-xray.png" "$HOME/.local/share/icons/ghostty-xray.png"
+for d in /var/lib/snapd/desktop/applications /usr/share/applications; do
+  f="$(ls "$d"/*ghostty*.desktop 2>/dev/null | head -1 || true)"; [[ -n "$f" ]] || continue
+  mkdir -p "$HOME/.local/share/applications"
+  sed "s|^Icon=.*|Icon=$HOME/.local/share/icons/ghostty-xray.png|" "$f" > "$HOME/.local/share/applications/$(basename "$f")"
+  update-desktop-database "$HOME/.local/share/applications" 2>/dev/null || true
+  ok "ghostty icon -> xray ($(basename "$f"))"; break
+done
 # neovim (LazyVim)
 mkdir -p "$HOME/.config/nvim"
 cmp -s "$DOTFILES/nvim/lazy-lock.json" "$HOME/.config/nvim/lazy-lock.json" 2>/dev/null || backup "$HOME/.config/nvim/lazy-lock.json"
